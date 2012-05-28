@@ -51,6 +51,7 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/../algorithm/pom.xml" />
       </list>
     </option>
   </component>
@@ -177,6 +178,7 @@
   </component>
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../algorithm/algorithm.iml" filepath="$PROJECT_DIR$/../algorithm/algorithm.iml" />
       <module fileurl="file://$PROJECT_DIR$/thinkingjava.iml" filepath="$PROJECT_DIR$/thinkingjava.iml" />
     </modules>
   </component>
@@ -187,7 +189,7 @@
     <output url="file://$PROJECT_DIR$/out" />
   </component>
   <component name="VcsDirectoryMappings">
-    <mapping directory="" vcs="" />
+    <mapping directory="$PROJECT_DIR$/../algorithm" vcs="Git" />
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
   </component>
   <component name="VssConfiguration">
