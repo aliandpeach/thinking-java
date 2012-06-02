@@ -1,6 +1,6 @@
 package chapter06_basic;
 
-import model.Book;
+import typeinfo.Book;
 
 /**
  * Created with IntelliJ IDEA.

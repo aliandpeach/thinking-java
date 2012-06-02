@@ -6,8 +6,9 @@ import static org.junit.Assert.assertTrue;
 
 public class ExceptionDemoTest {
 
-	@Test
-	public void test() {
-		assertTrue(true);
-	}
+    @Test
+    public void testExceptionChain() throws Exception {
+        ExceptionDemo exceptionDemo = new ExceptionDemo();
+        exceptionDemo.exceptionChain();
+    }
 }

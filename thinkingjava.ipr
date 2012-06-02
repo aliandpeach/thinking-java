@@ -54,6 +54,11 @@
         <option value="$PROJECT_DIR$/../algorithm/pom.xml" />
       </list>
     </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/../algorithm/pom.xml" />
+      </set>
+    </option>
   </component>
   <component name="Palette2">
     <group name="Swing">
@@ -176,9 +181,13 @@
       </item>
     </group>
   </component>
+  <component name="ProjectCodeStyleSettingsManager">
+    <option name="PER_PROJECT_SETTINGS">
+      <value />
+    </option>
+  </component>
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../algorithm/algorithm.iml" filepath="$PROJECT_DIR$/../algorithm/algorithm.iml" />
       <module fileurl="file://$PROJECT_DIR$/thinkingjava.iml" filepath="$PROJECT_DIR$/thinkingjava.iml" />
     </modules>
   </component>
