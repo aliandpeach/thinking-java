@@ -56,4 +56,11 @@ public class BasicDemo {
         }
         // Can't break or continue to labels here
     }
+
+    /**
+     * 测试Class对象是什么东东
+     */
+    public <T> boolean whatClass(T t) {
+        return t.getClass() instanceof Class;
+    }
 }

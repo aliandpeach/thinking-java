@@ -1,7 +1,8 @@
 package chapter06_basic;
 
 import org.junit.Test;
-
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class BasicDemoTest {
@@ -10,7 +11,7 @@ public class BasicDemoTest {
 	public void testBinaryString() {
         BasicDemo basic = new BasicDemo();
         basic.binaryString();
-		assertTrue(true);
+		assertThat(true, is(true));
 	}
     @Test
 	public void testLabeledFor() {
@@ -19,4 +20,12 @@ public class BasicDemoTest {
 		assertTrue(true);
 	}
 
+    /**
+     * 测试Class对象是什么东东
+     */
+    @Test
+    public void testWhatClass(){
+        BasicDemo basicDemo = new BasicDemo();
+        assertThat(basicDemo.whatClass(""), is(true));
+    }
 }

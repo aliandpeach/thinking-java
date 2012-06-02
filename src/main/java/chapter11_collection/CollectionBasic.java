@@ -26,7 +26,6 @@ public class CollectionBasic {
      */
     public List<String> asList() {
         // 显示类型参数说明
-        Arrays.<Object>asList(1,"2","3");
         return Arrays.asList("1","2","3");
     }
 
