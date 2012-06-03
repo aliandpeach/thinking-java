@@ -22,22 +22,26 @@ public class AtUnit implements ProcessFiles.Strategy {
 	static long testsRun = 0;
 	static long failures = 0;
 
-	public static void main(String[] args) throws Exception {
-		ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true); // Enable
-																			// asserts
-		new ProcessFiles(new AtUnit(), "class").start(args);
-		if (failures == 0)
-			print("OK (" + testsRun + " tests)");
-		else {
-			print("(" + testsRun + " tests)");
-			print("\n>>> " + failures + " FAILURE" + (failures > 1 ? "S" : "")
-					+ " <<<");
-			for (String failed : failedTests)
-				print("  " + failed);
-		}
-	}
+    /**
+     * Unit测试框架
+     * @param args
+     */
+    public static void unit(String[] args) {
+        ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true); // Enable
+        // asserts
+        new ProcessFiles(new AtUnit(), "class").start(args);
+        if (failures == 0)
+            print("OK (" + testsRun + " tests)");
+        else {
+            print("(" + testsRun + " tests)");
+            print("\n>>> " + failures + " FAILURE" + (failures > 1 ? "S" : "")
+                    + " <<<");
+            for (String failed : failedTests)
+                print("  " + failed);
+        }
+    }
 
-	public void process(File cFile) {
+    public void process(File cFile) {
 		try {
 			String cName = ClassNameFinder.thisClass(BinaryFile.read(cFile));
 			if (!cName.contains("."))
