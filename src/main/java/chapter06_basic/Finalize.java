@@ -1,6 +1,6 @@
 package chapter06_basic;
 
-import typeinfo.Book;
+import typeinfo.pojo.Book;
 
 /**
  * Created with IntelliJ IDEA.

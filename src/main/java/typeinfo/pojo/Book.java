@@ -1,4 +1,4 @@
-package typeinfo;
+package typeinfo.pojo;
 
 /**
  * Created with IntelliJ IDEA.

@@ -1,4 +1,4 @@
-package typeinfo;//: typeinfo/PetCount.java
+package typeinfo.pojo;//: typeinfo/PetCount.java
 // Using instanceof.
 
 import typeinfo.pets.*;

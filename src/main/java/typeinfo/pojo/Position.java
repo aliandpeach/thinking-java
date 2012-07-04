@@ -1,6 +1,6 @@
-package typeinfo;//: typeinfo/Position.java
+package typeinfo.pojo;//: typeinfo/Position.java
 
-class Position {
+public class Position {
 	private String title;
 	private Person person;
 

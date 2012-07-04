@@ -1,9 +1,9 @@
-package typeinfo;//: typeinfo/Person.java
+package typeinfo.pojo;//: typeinfo/Person.java
 // A class with a Null Object.
 
 import net.mindview.util.*;
 
-class Person {
+public class Person {
 	public final String first;
 	public final String last;
 	public final String address;

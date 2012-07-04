@@ -38,6 +38,7 @@
             <artifactId>javassist</artifactId>
             <version>3.12.1.GA</version>
         </dependency>
+
         <dependency>
             <groupId>xom</groupId>
             <artifactId>xom</artifactId>
@@ -52,6 +53,13 @@
                     <artifactId>xercesImpl</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.18</version>
+            <type>jar</type>
         </dependency>
 
     </dependencies>

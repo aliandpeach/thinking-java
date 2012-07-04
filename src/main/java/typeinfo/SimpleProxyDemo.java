@@ -1,5 +1,8 @@
 package typeinfo;//: typeinfo/SimpleProxyDemo.java
 
+import typeinfo.itf.Interface;
+import typeinfo.pojo.RealObject;
+
 import static net.mindview.util.Print.*;
 
 class SimpleProxy implements Interface {
