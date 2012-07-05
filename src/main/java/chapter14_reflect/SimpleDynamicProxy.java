@@ -5,6 +5,9 @@ import typeinfo.pojo.RealObject;
 
 import java.lang.reflect.*;
 
+/**
+ * Java动态代理
+ */
 class DynamicProxyHandler implements InvocationHandler {
     private Object proxied;
 
