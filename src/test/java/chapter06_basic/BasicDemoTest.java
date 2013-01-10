@@ -1,6 +1,10 @@
 package chapter06_basic;
 
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -28,4 +32,5 @@ public class BasicDemoTest {
         BasicDemo basicDemo = new BasicDemo();
         assertThat(basicDemo.whatClass(""), is(true));
     }
+
 }
