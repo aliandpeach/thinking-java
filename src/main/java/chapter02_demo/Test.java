@@ -28,6 +28,7 @@ public class Test {
     public static final Map<String,String> A = new HashMap<String,String>();
 
     public static void main(String[] args) {
+        int[] intArray = new int[]{1,2,3};
         Class<Test> clazz = Test.class;
         try {
             System.out.println(clazz.getDeclaredField("A").getName());
