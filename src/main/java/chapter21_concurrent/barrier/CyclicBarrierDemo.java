@@ -42,20 +42,21 @@ class CyclicBarrierDemo {
      */
     public static void main(String[] args) {
 //        testCyclic();
-        testFutureThreadPool();
+        testFutureThreadPool(3);
 //        testThreadPool();
     }
 
     /**
      * 测试CompletionService线程池
+     * @param runtimes
      */
-    private static void testFutureThreadPool() {
+    private static void testFutureThreadPool(int runtimes) {
         log.info("------------开始测试了-------------");
-        for (int i = 1; i <= 3000; i++) {
+        for (int i = 1; i <= runtimes; i++) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    execFutureThreadPoolTask();
+                    execFutureThreadPoolTask(600);
                 }
             }).start();
         }
@@ -91,16 +92,15 @@ class CyclicBarrierDemo {
         }
     }
 
-    private static void execFutureThreadPoolTask() {
+    private static void execFutureThreadPoolTask(int taskNum) {
         ExecutorService threadPool = null;
         try {
-            int taskNum = 6;
             threadPool = Executors.newFixedThreadPool(taskNum);
             List<Future<String>> futures = new ArrayList<Future<String>>(10);
 //            CompletionService<String> pool = new ExecutorCompletionService<String>(threadPool);
 
             for (int i = 0; i < taskNum - 1; i++) {
-                final long expendTime = (i + 1) * 1000L;
+                final long expendTime = 1000L;
                 futures.add(threadPool.submit(new Callable<String>() {
                     @Override
                     public String call() throws Exception {

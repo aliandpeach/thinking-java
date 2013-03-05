@@ -28,10 +28,10 @@ import java.util.*;
  * @version 1.0
  * @since 13-1-25
  */
-public class FiveHorsesTwo {
+public class TwentyFiveHorses {
 
     public static void main(String[] args) {
-        new FiveHorsesTwo().imitateRace();
+        new TwentyFiveHorses().imitateRace();
     }
 
     /**
