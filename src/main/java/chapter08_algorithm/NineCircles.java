@@ -13,7 +13,7 @@
  * 
  * Copyright @2013 the original author or authors.
  */
-package chapter08_algorithm;
+package javademo;
 
 /**
  * 九连环
@@ -23,6 +23,32 @@ package chapter08_algorithm;
  * @since 13-3-4
  */
 public class NineCircles {
+    private static final int CIRCLE_NUM = 9;
+    private static int upCount = 0;
+    private static int downCount = 0;
+
+    public static void main(String[] args) {
+        letMeSee(CIRCLE_NUM);
+    }
+
+    private static void letMeSee(int circleNum) {
+        int[] statusOff = new int[circleNum];
+        int[] statusOn = new int[circleNum];
+        for (int i = 0; i < circleNum; i++) {
+            statusOff[i] = 0;
+            statusOn[i] = 1;
+        }
+        System.out.println("----上环----START");
+        UP(statusOff, statusOff.length);
+        System.out.println("上环总步骤数：" + upCount);
+        System.out.println("----------END---------");
+        System.out.println("----下环----START");
+        DOWN(statusOn, statusOn.length);
+        System.out.println("下环总步骤数：" + downCount);
+        System.out.println("--------END------------");
+    }
+
+
     /**
      * 上环一个
      *
@@ -39,7 +65,6 @@ public class NineCircles {
             if (!isOn(status, index - 1)) up(status, index - 1);
             if (!isAllOff(status, index - 2)) DOWN(status, index - 2);
             justUp(status, index);
-            if (!isAllOn(status, index - 1)) UP(status, index - 1);
         }
     }
 
@@ -59,7 +84,6 @@ public class NineCircles {
             if (!isOn(status, index - 1)) up(status, index - 1);
             if (!isAllOff(status, index - 2)) DOWN(status, index - 2);
             justDown(status, index);
-            if (!isAllOff(status, index - 1)) DOWN(status, index - 1);
         }
     }
 
@@ -188,28 +212,4 @@ public class NineCircles {
         return isAllOff;
     }
 
-    public static void main(String[] args) {
-        letMeSee(CIRCLE_NUM);
-    }
-
-    private static void letMeSee(int circleNum) {
-        int[] statusOff = new int[circleNum];
-        int[] statusOn = new int[circleNum];
-        for (int i = 0; i < circleNum; i++) {
-            statusOff[i] = 0;
-            statusOn[i] = 1;
-        }
-        System.out.println("----上环----START");
-        UP(statusOff, statusOff.length);
-        System.out.println("上环总步骤数：" + upCount);
-        System.out.println("----------END---------");
-        System.out.println("----下环----START");
-        DOWN(statusOn, statusOn.length);
-        System.out.println("下环总步骤数：" + downCount);
-        System.out.println("--------END------------");
-    }
-
-    private static final int CIRCLE_NUM = 9;
-    private static int upCount = 0;
-    private static int downCount = 0;
 }
