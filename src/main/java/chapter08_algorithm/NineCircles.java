@@ -31,9 +31,15 @@ public class NineCircles {
      */
     private static void up(int[] status, int index) {
         if (status[index - 1] == 0) {
+            System.out.println("-------Start--------");
+            for (int k : status) System.out.print(k);
+            System.out.println();
             System.out.println("----上环：" + index);
             upCount++;
             status[index - 1] = 1;
+            for (int k : status) System.out.print(k);
+            System.out.println();
+            System.out.println("-------End--------");
         }
     }
 
@@ -45,14 +51,20 @@ public class NineCircles {
      */
     private static void down(int[] status, int index) {
         if (status[index - 1] == 1) {
+            System.out.println("-------Start--------");
+            for (int k : status) System.out.print(k);
+            System.out.println();
             System.out.println("----下环：" + index);
             downCount++;
             status[index - 1] = 0;
+            for (int k : status) System.out.print(k);
+            System.out.println();
+            System.out.println("-------End--------");
         }
     }
 
     /**
-     * 上环number个
+     * 上环前number个
      *
      * @param status
      * @param number
@@ -72,7 +84,7 @@ public class NineCircles {
     }
 
     /**
-     * 下环number个
+     * 下环前number个
      *
      * @param status
      * @param number

@@ -28,12 +28,18 @@ public class Test {
     public static final Map<String,String> A = new HashMap<String,String>();
 
     public static void main(String[] args) {
-        int[] intArray = new int[]{1,2,3};
-        Class<Test> clazz = Test.class;
-        try {
-            System.out.println(clazz.getDeclaredField("A").getName());
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
+//        int[] intArray = new int[]{1,2,3};
+//        Class<Test> clazz = Test.class;
+//        try {
+//            System.out.println(clazz.getDeclaredField("A").getName());
+//        } catch (NoSuchFieldException e) {
+//            e.printStackTrace();
+//        }
+        // 1 1111 1111
+        int a = 0x1FF;
+        // 1 1111 1111
+        // 0 0000 0000
+        System.out.println(a >> 2);
+
     }
 }
