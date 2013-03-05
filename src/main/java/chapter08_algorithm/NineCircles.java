@@ -30,16 +30,16 @@ public class NineCircles {
      * @param index
      */
     private static void up(int[] status, int index) {
-        if (status[index - 1] == 0) {
-            System.out.println("-------Start--------");
-            for (int k : status) System.out.print(k);
-            System.out.println();
-            System.out.println("----上环：" + index);
-            upCount++;
-            status[index - 1] = 1;
-            for (int k : status) System.out.print(k);
-            System.out.println();
-            System.out.println("-------End--------");
+        if (index <= 0) return;
+        if (index == 1) {
+            justUp(status, 1);
+        } else if (isAllOff(status, index - 2) && isOn(status, index - 1)) {
+            justUp(status, index);
+        } else {
+            if (!isOn(status, index - 1)) up(status, index - 1);
+            if (!isAllOff(status, index - 2)) DOWN(status, index - 2);
+            justUp(status, index);
+            if (!isAllOn(status, index - 1)) UP(status, index - 1);
         }
     }
 
@@ -50,16 +50,16 @@ public class NineCircles {
      * @param index
      */
     private static void down(int[] status, int index) {
-        if (status[index - 1] == 1) {
-            System.out.println("-------Start--------");
-            for (int k : status) System.out.print(k);
-            System.out.println();
-            System.out.println("----下环：" + index);
-            downCount++;
-            status[index - 1] = 0;
-            for (int k : status) System.out.print(k);
-            System.out.println();
-            System.out.println("-------End--------");
+        if (index <= 0) return;
+        if (index == 1) {
+            justDown(status, index);
+        } else if (isAllOff(status, index - 2) && isOn(status, index - 1)) {
+            justDown(status, index);
+        } else {
+            if (!isOn(status, index - 1)) up(status, index - 1);
+            if (!isAllOff(status, index - 2)) DOWN(status, index - 2);
+            justDown(status, index);
+            if (!isAllOff(status, index - 1)) DOWN(status, index - 1);
         }
     }
 
@@ -71,15 +71,33 @@ public class NineCircles {
      */
     private static void UP(int[] status, int number) {
         if (number == 1) {
-            up(status, 1);
+            justUp(status, 1);
         } else if (number == 2) {
-            up(status, 1);
-            up(status, 2);
+            justUp(status, 1);
+            justUp(status, 2);
         } else if (number > 2) {
-            DOWN(status, number - 2);
-            up(status, number - 1);
-            up(status, number);
-            UP(status, number - 1);
+            if (!isOn(status, number - 1)) up(status, number - 1);
+            if (!isAllOff(status, number - 2)) {
+                int validNum = number - 2;
+                while (validNum > 0) {
+                    if (status[validNum - 1] == 1) {
+                        break;
+                    }
+                    validNum--;
+                }
+                DOWN(status, validNum);
+            }
+            if (!isOn(status, number)) up(status, number);
+            if (!isAllOn(status, number - 1)) {
+                int validNum = number - 1;
+                while (validNum > 0) {
+                    if (status[validNum - 1] == 0) {
+                        break;
+                    }
+                    validNum--;
+                }
+                UP(status, validNum);
+            }
         }
     }
 
@@ -91,32 +109,107 @@ public class NineCircles {
      */
     private static void DOWN(int[] status, int number) {
         if (number == 1) {
-            down(status, number);
+            justDown(status, 1);
         } else if (number == 2) {
-            up(status, 1);
-            down(status, 2);
-            down(status, 1);
+            justUp(status, 1);
+            justDown(status, 2);
+            justDown(status, 1);
         } else if (number > 2) {
-            DOWN(status, number - 2);
-            up(status, number - 1);
-            down(status, number);
-            DOWN(status, number - 1);
+            if (!isOn(status, number - 1)) up(status, number - 1);
+            if (!isAllOff(status, number - 2)) DOWN(status, number - 2);
+            if (!isOff(status, number)) down(status, number);
+            if (!isAllOff(status, number - 1)) DOWN(status, number - 1);
         }
     }
 
+    private static void justUp(int[] status, int index) {
+        if (status[index - 1] == 0) {
+            for (int k : status) System.out.print(k);
+            System.out.println();
+            System.out.println("----上环：" + index);
+            status[index - 1] = 1;
+            upCount++;
+        }
+    }
+
+    private static void justDown(int[] status, int index) {
+        if (status[index - 1] == 1) {
+            for (int k : status) System.out.print(k);
+            System.out.println();
+            System.out.println("----下环：" + index);
+            status[index - 1] = 0;
+            downCount++;
+        }
+    }
+
+    /**
+     * 数组arr前num个数是否都是1
+     *
+     * @param arr
+     * @param num
+     * @return
+     */
+    private static boolean isAllOn(int[] arr, int num) {
+        if (num <= 0) return true;
+        boolean isAllOn = true;
+        for (int i = 0; i < num; i++) {
+            if (arr[i] == 0) {
+                isAllOn = false;
+                break;
+            }
+        }
+        return isAllOn;
+    }
+
+    private static boolean isOn(int[] arr, int num) {
+        return num <= 0 || arr[num - 1] == 1;
+    }
+
+    private static boolean isOff(int[] arr, int num) {
+        return num <= 0 || arr[num - 1] == 0;
+    }
+
+    /**
+     * 数组arr前num个数是否都是0
+     *
+     * @param arr
+     * @param num
+     * @return
+     */
+    private static boolean isAllOff(int[] arr, int num) {
+        if (num <= 0) return true;
+        boolean isAllOff = true;
+        for (int i = 0; i < num; i++) {
+            if (arr[i] == 1) {
+                isAllOff = false;
+                break;
+            }
+        }
+        return isAllOff;
+    }
+
     public static void main(String[] args) {
-        System.out.println("----9个环上环----START");
-        UP(STATUS_OFF, STATUS_OFF.length);
+        letMeSee(CIRCLE_NUM);
+    }
+
+    private static void letMeSee(int circleNum) {
+        int[] statusOff = new int[circleNum];
+        int[] statusOn = new int[circleNum];
+        for (int i = 0; i < circleNum; i++) {
+            statusOff[i] = 0;
+            statusOn[i] = 1;
+        }
+        System.out.println("----上环----START");
+        UP(statusOff, statusOff.length);
         System.out.println("上环总步骤数：" + upCount);
         System.out.println("----------END---------");
-        System.out.println("----9个环下环----START");
-        DOWN(STATUS_ON, STATUS_ON.length);
+        System.out.println("----下环----START");
+        DOWN(statusOn, statusOn.length);
         System.out.println("下环总步骤数：" + downCount);
         System.out.println("--------END------------");
     }
 
-    private static final int[] STATUS_OFF = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
-    private static final int[] STATUS_ON = new int[]{1, 1, 1, 1, 1, 1, 1, 1, 1};
+    private static final int CIRCLE_NUM = 9;
     private static int upCount = 0;
     private static int downCount = 0;
 }
