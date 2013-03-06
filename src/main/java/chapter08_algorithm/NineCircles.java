@@ -29,6 +29,7 @@ public class NineCircles {
 
     public static void main(String[] args) {
         letMeSee(CIRCLE_NUM);
+        letMeSee(new int[]{0, 0, 0}, new int[]{1, 1, 1});
     }
 
     private static void letMeSee(int circleNum) {
@@ -38,6 +39,17 @@ public class NineCircles {
             statusOff[i] = 0;
             statusOn[i] = 1;
         }
+        System.out.println("----上环----START");
+        UP(statusOff, statusOff.length);
+        System.out.println("上环总步骤数：" + upCount);
+        System.out.println("----------END---------");
+        System.out.println("----下环----START");
+        DOWN(statusOn, statusOn.length);
+        System.out.println("下环总步骤数：" + downCount);
+        System.out.println("--------END------------");
+    }
+
+    private static void letMeSee(int[] statusOff, int[] statusOn) {
         System.out.println("----上环----START");
         UP(statusOff, statusOff.length);
         System.out.println("上环总步骤数：" + upCount);
