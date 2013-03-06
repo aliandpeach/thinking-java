@@ -13,7 +13,7 @@
  * 
  * Copyright @2013 the original author or authors.
  */
-package javademo;
+package chapter08_algorithm;
 
 /**
  * 九连环
