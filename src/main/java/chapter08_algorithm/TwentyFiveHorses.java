@@ -79,8 +79,8 @@ public class TwentyFiveHorses {
                 }
             });
             headList.add(eachGroup.get(4));
-            for (int i = 0; i < eachGroup.size()-1; i++) {
-                eachGroup.get(i).setNext(eachGroup.get(i+1));
+            for (int i = 0; i < eachGroup.size() - 1; i++) {
+                eachGroup.get(i).setNext(eachGroup.get(i + 1));
             }
             System.out.println("每小组比赛结果，排名从后到前的马儿编号为：");
             for (Horse each : eachGroup) {
@@ -88,9 +88,10 @@ public class TwentyFiveHorses {
             }
             System.out.println();
             System.out.println("--------------------分割线------------------------");
+            System.out.println();
         }
 
-        System.out.println("第6轮比赛，接下来把上面5组比赛的第一名拿出来比赛，这场比赛称作 '头名PK比赛' ");
+        System.out.println("第6轮比赛，接下来把上面5组比赛的第一名拿出来比赛");
         String ids = "";
         for (Horse h : headList) {
             ids += h.getId() + " ";
@@ -102,14 +103,18 @@ public class TwentyFiveHorses {
                 return o1.getExpendTime() < o2.getExpendTime() ? 1 : 0;
             }
         });
-        System.out.println("'头名PK比赛'比赛结果，排名从后到前的马儿编号为：");
-        for (int i = 0; i < headList.size()-1; i++) {
-            headList.get(i).setNext(headList.get(i+1));
+        System.out.println("第6轮比赛结果，排名从后到前的马儿编号为：");
+        for (int i = 0; i < headList.size() - 1; i++) {
+            headList.get(i).setNext(headList.get(i + 1));
         }
         for (Horse each : headList) {
             System.out.print(each.getId() + "  ");
         }
         System.out.println();
+        Horse champion = headList.get(headList.size() - 1);
+        System.out.println("第一名率先出来了，id编号为" + champion.getId());
+        candidateList.remove(champion);
+        System.out.println("接下来，将所有与第一名的路径大于2的马儿淘汰掉（这里是核心算法）");
         Iterator<Horse> iterator = candidateList.iterator();
         while (iterator.hasNext()) {
             Horse horse = iterator.next();
@@ -123,15 +128,13 @@ public class TwentyFiveHorses {
                 horse = horse.next;
             }
         }
-        System.out.println("--------第六轮过后，剩下有资格争夺排名的马儿:-----");
-        Horse champion = null;
+        System.out.println("第6轮过后，剩下有资格争夺排名的马儿:");
         for (Horse horse : candidateList) {
-            if (horse.next == null) champion = horse;
             System.out.println(horse);
         }
-        System.out.println("第一名率先出来了，id编号为" + champion.getId());
-        candidateList.remove(champion);
-
+        assert candidateList.size() == 5;
+        System.out.println("从以上结果看出，刚好还剩5匹马儿可以争夺最后的第2，第3名");
+        System.out.println();
         System.out.println("--------------------分割线------------------------");
         System.out.println("第7轮比赛开始：");
         Collections.sort(candidateList, new Comparator<Horse>() {
@@ -141,30 +144,17 @@ public class TwentyFiveHorses {
             }
         });
         System.out.println("最后一场比赛比赛结果，排名从后到前的马儿编号为：");
-        for (int i = 0; i < candidateList.size()-1; i++) {
-            candidateList.get(i).setNext(candidateList.get(i+1));
-            System.out.print(candidateList.get(i).getId() + "  ");
+        for (Horse aCandidateList : candidateList) {
+            System.out.print(aCandidateList.getId() + "  ");
         }
-        candidateList.get(candidateList.size()-1).setNext(null);
-        Iterator<Horse> candidateIterator = candidateList.iterator();
-        while (candidateIterator.hasNext()) {
-            Horse horse = candidateIterator.next();
-            int pathlen = 0;
-            while (horse.next != null) {
-                horse = horse.next;
-                pathlen++;
-                if (pathlen > 1) {
-                    candidateIterator.remove();
-                    break;
-                }
-            }
-        }
-        System.out.println("-----------最后两名也出来了-----");
-        assert candidateList.size()==2;
-        for (Horse horse : candidateList) {
-            if (horse.next != null) System.out.println("第三名Id为：" + horse.id);
-            else System.out.println("第二名Id为：" + horse.id);
-        }
+        System.out.println();
+        System.out.println("然后第2名和第3名也出来了");
+        System.out.println();
+
+        System.out.println("-------------------最后比赛结果：---------------");
+        System.out.println("第1名id为" + champion.getId());
+        System.out.println("第2名Id为：" + candidateList.get(candidateList.size() - 1).getId());
+        System.out.println("第3名Id为：" + candidateList.get(candidateList.size() - 2).getId());
         System.out.println();
 
         System.out.println("------------------------结束模拟---------------------");

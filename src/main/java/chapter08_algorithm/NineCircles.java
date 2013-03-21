@@ -28,11 +28,11 @@ public class NineCircles {
     private static int downCount = 0;
 
     public static void main(String[] args) {
-        letMeSee(CIRCLE_NUM);
-        letMeSee(new int[]{0, 0, 0}, new int[]{1, 1, 1});
+        mockNineCircle(CIRCLE_NUM);
+        //mockNineCircle(new int[]{0, 0, 0}, new int[]{1, 1, 1});
     }
 
-    private static void letMeSee(int circleNum) {
+    private static void mockNineCircle(int circleNum) {
         int[] statusOff = new int[circleNum];
         int[] statusOn = new int[circleNum];
         for (int i = 0; i < circleNum; i++) {
@@ -49,7 +49,7 @@ public class NineCircles {
         System.out.println("--------END------------");
     }
 
-    private static void letMeSee(int[] statusOff, int[] statusOn) {
+    private static void mockNineCircle(int[] statusOff, int[] statusOn) {
         System.out.println("----上环----START");
         UP(statusOff, statusOff.length);
         System.out.println("上环总步骤数：" + upCount);
