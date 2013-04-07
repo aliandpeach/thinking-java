@@ -64,6 +64,9 @@ public class Test {
 
     private static String hehe(Class<?> clazz) {
         System.out.println(clazz.getName());
+        {
+            System.out.println("what???");
+        }
         return clazz.getName();
     }
 

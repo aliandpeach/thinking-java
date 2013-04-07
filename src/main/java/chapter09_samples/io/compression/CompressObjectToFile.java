@@ -23,7 +23,8 @@ package chapter09_samples.io.compression;
  * @since 13-3-29
  */
 
-import com.xn.io.model.Address;
+
+import chapter09_samples.io.model.Address;
 
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
