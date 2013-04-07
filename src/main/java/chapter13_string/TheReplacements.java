@@ -21,8 +21,7 @@ public class TheReplacements {
     public void regularReplace(String regex, String str) {
         String s = TextFile.read("TheReplacements.java");
         // Match the specially commented block of text above:
-        Matcher mInput = Pattern.compile("/\\*!(.*)!\\*/", Pattern.DOTALL)
-                .matcher(s);
+        Matcher mInput = Pattern.compile("/\\*!(.*)!\\*/", Pattern.DOTALL).matcher(s);
         if (mInput.find())
             s = mInput.group(1); // Captured by parentheses
         // Replace two or more spaces with a single space:
