@@ -47,6 +47,9 @@ public class Json {
         System.out.println(json1.toString());
     }
 
+//    private static final Json instance = new Json();
+//    private Json() {}
+//    public static final Json getInstance() {return instance;}
     private Map map = new LinkedHashMap();
 
     /**
@@ -203,7 +206,7 @@ public class Json {
      * Append JSON property value that is a Integer
      *
      * @param sb
-     * @param num
+     * @param obj
      */
     private void appendOther(StringBuilder sb, Object obj) {
         sb.append(obj);

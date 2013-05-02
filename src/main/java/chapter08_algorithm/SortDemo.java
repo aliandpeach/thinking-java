@@ -15,10 +15,9 @@
  */
 package chapter08_algorithm;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import chapter08_algorithm.model.GroupModel;
+
+import java.util.*;
 
 /**
  * Description of this file.
@@ -28,68 +27,78 @@ import java.util.List;
  * @since 13-5-2
  */
 public class SortDemo {
-    private static class JSONModel {
-        List<Module> moduleList;
-    }
-    private static class Group {
-        String groupKey;
-        List<Module> moduleList;
-    }
-    private static class Module {
-        String moduleKey;
-        List<Org> orgList;
-    }
-    private static class Org {
-        String orgKey;
-        List<Supply> supplyList;
-    }
-    private static class Supply {
-        String supplyKey;
-        List<Authority> authorityList;
-    }
-    private static class Authority {
-        String authority;
-    }
-    private static class GroupModel {
-        String id;
-        String accountId;
-        String orgId;
-        String supplyId;
-        DomModel dom;
-    }
-    private static class DomModel {
-        String domId;
-        String module;
-        String moduleName;
-        String authority;
-        String authorityName;
-    }
 
-    private static JSONModel sort(List<GroupModel> list) {
-        JSONModel result = new JSONModel();
-        Collections.sort(list, new Comparator<GroupModel>() {
-            @Override
-            public int compare(GroupModel o1, GroupModel o2) {
-                return 0;
+    private static String toJson(List<GroupModel> list) {
+//        ComparatorChain comparatorChain = new ComparatorChain();
+//        comparatorChain.addComparator(new BeanComparator("accountId"));
+//        comparatorChain.addComparator(new BeanComparator("module"));
+//        comparatorChain.addComparator(new BeanComparator("orgId"));
+//        comparatorChain.addComparator(new BeanComparator("supplyId"));
+//        Collections.sort(list, comparatorChain);
+        Map<String, Map<String, Map<String, Map<String, String>>>> dataMap = new HashMap<String, Map<String, Map<String, Map<String, String>>>>();
+        for (GroupModel groupModel : list) {
+            String accountId = groupModel.getAccountId();
+            String module = groupModel.getModule();
+            String orgId = groupModel.getOrgId();
+            String supplyId = groupModel.getSupplyId();
+            String authority = groupModel.getAuthority();
+            if (!dataMap.containsKey(accountId)) {
+                dataMap.put(accountId, new HashMap<String, Map<String, Map<String, String>>>());
             }
-        });
-        return result;
+            if (!dataMap.get(accountId).containsKey(module)) {
+                dataMap.get(accountId).put(module, new HashMap<String, Map<String, String>>());
+            }
+            if (!dataMap.get(accountId).get(module).containsKey(orgId)) {
+                dataMap.get(accountId).get(module).put(orgId, new HashMap<String, String>());
+            }
+            dataMap.get(accountId).get(module).get(orgId).put(supplyId, authority);
+        }
+        Json rootJson = new Json();
+        Set<String> groupKeySet = dataMap.keySet();
+        for (String groupKey : groupKeySet) {
+            Map<String, Map<String, Map<String, String>>> eachGroup = dataMap.get(groupKey);
+            Json groupJson = new Json();
+            rootJson.add(groupKey, groupJson);
+            Set<String> moduleKeySet = eachGroup.keySet();
+            for (String moduleKey : moduleKeySet) {
+                Map<String, Map<String, String>> eachModule = eachGroup.get(moduleKey);
+                Json moduleJson = new Json();
+                groupJson.add(moduleKey, moduleJson);
+                Set<String> orgKeySet = eachModule.keySet();
+                for (String orgKey : orgKeySet) {
+                    Map<String, String> eachOrg = eachModule.get(orgKey);
+                    Json orgJson = new Json();
+                    moduleJson.add(orgKey, orgJson);
+                    Set<String> supplyKeySet = eachOrg.keySet();
+                    for (String supplyKey : supplyKeySet) {
+                        String authority = eachOrg.get(supplyKey);
+                        orgJson.add(supplyKey, authority);
+                    }
+                }
+            }
+        }
+        System.out.println(rootJson.toString());
+        return rootJson.toString();
     }
 
     public static void main(String[] args) {
         List<GroupModel> groupList = new ArrayList<GroupModel>();
+        assembleData(groupList);
+        toJson(groupList);
+        System.out.println("one step");
+    }
+
+    private static void assembleData(List<GroupModel> groupList) {
         GroupModel group1 = new GroupModel();
         group1.id = "421";
         group1.accountId="group201304107114859";
         group1.orgId="3000000332";
         group1.supplyId="80";
-        DomModel dom1 = new DomModel();
-        dom1.domId="cm.Ludan";
-        dom1.module="Ludan";
-        dom1.moduleName="录单";
-        dom1.authority="View,Execute,Del,New,Control";
-        dom1.authorityName="查看,执行,删除,新建,全控制";
-        group1.dom = dom1;
+        group1.domId="cm.Ludan";
+        group1.module="Ludan";
+        group1.moduleName="录单";
+        group1.authority="View,Execute,Del,New,Control";
+        group1.authorityName="查看,执行,删除,新建,全控制";
         groupList.add(group1);
 
         group1 = new GroupModel();
@@ -97,13 +106,11 @@ public class SortDemo {
         group1.accountId="group201304107114859";
         group1.orgId="1244000000";
         group1.supplyId="*";
-        dom1 = new DomModel();
-        dom1.domId="cm.Verify";
-        dom1.module="Verify";
-        dom1.moduleName="初审";
-        dom1.authority="View";
-        dom1.authorityName="查看";
-        group1.dom = dom1;
+        group1.domId="cm.Verify";
+        group1.module="Verify";
+        group1.moduleName="初审";
+        group1.authority="View";
+        group1.authorityName="查看";
         groupList.add(group1);
 
         group1 = new GroupModel();
@@ -111,13 +118,11 @@ public class SortDemo {
         group1.accountId="group201304107114859";
         group1.orgId="3000000322";
         group1.supplyId="78";
-        dom1 = new DomModel();
-        dom1.domId="cm.Insure";
-        dom1.module="Insure";
-        dom1.moduleName="核保";
-        dom1.authority="View,Execute,New,Del";
-        dom1.authorityName="查看,执行,新增,删除";
-        group1.dom = dom1;
+        group1.domId="cm.Insure";
+        group1.module="Insure";
+        group1.moduleName="核保";
+        group1.authority="View,Execute,New,Del";
+        group1.authorityName="查看,执行,新增,删除";
         groupList.add(group1);
 
         group1 = new GroupModel();
@@ -125,13 +130,11 @@ public class SortDemo {
         group1.accountId="group201304107114859";
         group1.orgId="3000000327";
         group1.supplyId="123";
-        dom1 = new DomModel();
-        dom1.domId="cm.Payment";
-        dom1.module="Payment";
-        dom1.moduleName="支付";
-        dom1.authority="View,Execute,Del,New,Control";
-        dom1.authorityName="查看,执行,删除,新建,全控制";
-        group1.dom = dom1;
+        group1.domId="cm.Payment";
+        group1.module="Payment";
+        group1.moduleName="支付";
+        group1.authority="View,Execute,Del,New,Control";
+        group1.authorityName="查看,执行,删除,新建,全控制";
         groupList.add(group1);
 
         group1 = new GroupModel();
@@ -139,13 +142,11 @@ public class SortDemo {
         group1.accountId="group201304107114859";
         group1.orgId="1233000000";
         group1.supplyId="29";
-        dom1 = new DomModel();
-        dom1.domId="cm.Quote";
-        dom1.module="Quote";
-        dom1.moduleName="报价";
-        dom1.authority="View,Execute,Del,New,Control";
-        dom1.authorityName="查看,执行,删除,新建,全控制";
-        group1.dom = dom1;
+        group1.domId="cm.Quote";
+        group1.module="Quote";
+        group1.moduleName="报价";
+        group1.authority="View,Execute,Del,New,Control";
+        group1.authorityName="查看,执行,删除,新建,全控制";
         groupList.add(group1);
 
         group1 = new GroupModel();
@@ -153,13 +154,11 @@ public class SortDemo {
         group1.accountId="group201304107114859";
         group1.orgId="3000000332";
         group1.supplyId="82";
-        dom1 = new DomModel();
-        dom1.domId="cm.Ludan";
-        dom1.module="Ludan";
-        dom1.moduleName="录单";
-        dom1.authority="View,Execute,Del,New,Control";
-        dom1.authorityName="查看,执行,删除,新建,全控制";
-        group1.dom = dom1;
+        group1.domId="cm.Ludan";
+        group1.module="Ludan";
+        group1.moduleName="录单";
+        group1.authority="View,Execute,Del,New,Control";
+        group1.authorityName="查看,执行,删除,新建,全控制";
         groupList.add(group1);
 
         group1 = new GroupModel();
@@ -167,15 +166,11 @@ public class SortDemo {
         group1.accountId="group201304107114859";
         group1.orgId="3000000323";
         group1.supplyId="120";
-        dom1 = new DomModel();
-        dom1.domId="cm.Ludan";
-        dom1.module="Ludan";
-        dom1.moduleName="录单";
-        dom1.authority="View,Execute,Del,New,Control";
-        dom1.authorityName="查看,执行,删除,新建,全控制";
-        group1.dom = dom1;
+        group1.domId="cm.Ludan";
+        group1.module="Ludan";
+        group1.moduleName="录单";
+        group1.authority="View,Execute,Del,New,Control";
+        group1.authorityName="查看,执行,删除,新建,全控制";
         groupList.add(group1);
-
-
     }
 }
