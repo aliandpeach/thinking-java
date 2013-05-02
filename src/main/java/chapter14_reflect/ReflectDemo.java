@@ -1,17 +1,10 @@
 package chapter14_reflect;
 
-import org.codehaus.groovy.reflection.ClassInfo;
-import sun.reflect.ReflectionFactory;
-import sun.reflect.annotation.AnnotationType;
-
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.ref.SoftReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
 

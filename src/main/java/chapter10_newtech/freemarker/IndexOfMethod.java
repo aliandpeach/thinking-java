@@ -1,5 +1,5 @@
 /*
- * Created on 13-3-29
+ * Created on 13-4-27
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,36 +13,27 @@
  * 
  * Copyright @2013 the original author or authors.
  */
-package chapter09_samples.json.gson;
+package chapter10_newtech.freemarker;
 
-import com.google.gson.Gson;
+import freemarker.template.SimpleNumber;
+import freemarker.template.TemplateMethodModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.util.List;
 
 /**
  * Description of this file.
  *
  * @author XiongNeng
  * @version 1.0
- * @since 13-3-29
+ * @since 13-4-27
  */
-public class FromJsonExample {
-    public static void main(String[] args) {
-
-        Gson gson = new Gson();
-        try {
-
-            BufferedReader br = new BufferedReader(new FileReader("D:\\study\\effective\\src\\main\\resources\\file.json"));
-
-            //convert the json string back to object
-            DataObject obj = gson.fromJson(br, DataObject.class);
-
-            System.out.println(obj);
-
-        } catch (IOException e) {
-            e.printStackTrace();
+public class IndexOfMethod implements TemplateMethodModel {
+    public TemplateModel exec(List args) throws TemplateModelException {
+        if (args.size() != 2) {
+            throw new TemplateModelException("Wrong arguments");
         }
+        return new SimpleNumber(((String) args.get(1)).indexOf((String) args.get(0)));
     }
 }

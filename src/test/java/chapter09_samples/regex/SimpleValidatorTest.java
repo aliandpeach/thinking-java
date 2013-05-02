@@ -1,5 +1,5 @@
 /*
- * Created on 13-3-29
+ * Created on 13-4-25
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,37 +13,20 @@
  * 
  * Copyright @2013 the original author or authors.
  */
-package chapter09_samples.json.gson;
+package chapter09_samples.regex;
+
+import org.junit.Test;
 
 /**
  * Description of this file.
  *
  * @author XiongNeng
  * @version 1.0
- * @since 13-3-29
+ * @since 13-4-25
  */
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class DataObject {
-
-    private int data1 = 100;
-    private String data2 = "hello";
-    private List<String> list = new ArrayList<String>() {
-        {
-            add("String 1");
-            add("String 2");
-            add("String 3");
-        }
-    };
-
-    //getter and setter methods
-
-    @Override
-    public String toString() {
-        return "DataObject [data1=" + data1 + ", data2=" + data2 + ", list="
-                + list + "]";
+public class SimpleValidatorTest {
+    @Test
+    public void testValidate() throws Exception {
+        System.out.println(new SimpleValidator().validate("公无"));
     }
-
 }

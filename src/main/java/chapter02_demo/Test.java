@@ -30,7 +30,9 @@ public class Test {
     public static final Map<String,String> A = new HashMap<String,String>();
 
     public static void main(String[] args) {
-        findJiraTasksByEnquiryId(PersonSon.class);
+        String strClassPath = System.getProperty("java.class.path");
+
+        System.out.println("Classpath is " + strClassPath);
     }
 
     /**

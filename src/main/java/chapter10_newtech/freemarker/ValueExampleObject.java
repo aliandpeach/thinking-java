@@ -1,5 +1,5 @@
 /*
- * Created on 13-3-29
+ * Created on 13-4-25
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,30 +13,30 @@
  * 
  * Copyright @2013 the original author or authors.
  */
-package chapter09_samples.json.gson;
+package chapter10_newtech.freemarker;
 
 /**
  * Description of this file.
  *
  * @author XiongNeng
  * @version 1.0
- * @since 13-3-29
+ * @since 13-4-25
  */
+public class ValueExampleObject {
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+    private String name;
 
-public class PrettyOutputExample {
-    public static void main(String[] args) {
-
-        DataObject obj = new DataObject();
-        // Gson gson = new Gson();
-
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-        String json = gson.toJson(obj);
-
-        System.out.println(json);
-
+    public ValueExampleObject(String name) {
+        super();
+        this.name = name;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
 }

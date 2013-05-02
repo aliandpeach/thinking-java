@@ -1,5 +1,5 @@
 /*
- * Created on 13-3-29
+ * Created on 13-4-15
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -20,29 +20,25 @@ package chapter09_samples.json.jackson;
  *
  * @author XiongNeng
  * @version 1.0
- * @since 13-3-29
+ * @since 13-4-15
  */
+public class PointModel {
+    private int x;
+    private int y;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
+    public int getX() {
+        return x;
+    }
 
-import java.io.IOException;
+    public void setX(int x) {
+        this.x = x;
+    }
 
-public class PrettyPrintJson {
-    public static void main(String[] args) {
+    public int getY() {
+        return y;
+    }
 
-        User user = new User();
-        ObjectMapper mapper = new ObjectMapper();
-
-        try {
-            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(user));
-        } catch (JsonGenerationException e) {
-            e.printStackTrace();
-        } catch (JsonMappingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void setY(int y) {
+        this.y = y;
     }
 }
