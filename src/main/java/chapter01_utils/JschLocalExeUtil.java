@@ -15,6 +15,8 @@
  */
 package chapter01_utils;
 
+import java.io.IOException;
+
 /**
  * 执行本地Windows命令.
  *
@@ -23,7 +25,28 @@ package chapter01_utils;
  * @since 13-6-15
  */
 public class JschLocalExeUtil {
-    public static void execute(String command) {
 
+    public static void main(String[] args) {
+        maven("D:\\workspace\\BoneCP");
     }
+
+    public static void maven(String baseDir) {
+        execute("cmd /c cd /d " + baseDir
+                + " && mvn clean && mvn package -DskipTests");
+    }
+
+    public static void grails(String baseDir) {
+        execute("cmd /c cd /d " + baseDir
+                + " && grails clean && grails prod war");
+    }
+
+    private static void execute(String command) {
+        Runtime run=Runtime.getRuntime();
+        try {
+            run.exec(command);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
