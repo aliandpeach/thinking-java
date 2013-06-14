@@ -8,8 +8,10 @@ import java.nio.channels.FileChannel;
 public class TransferTo {
   public static void main(String[] args) throws Exception {
     if(args.length != 2) {
+        String[] ss = {};
       System.out.println("arguments: sourcefile destfile");
-      System.exit(1);
+      //System.exit(1);
+        args = new String[]{"D:/input.txt", "D:/output.txt"};
     }
     FileChannel
       in = new FileInputStream(args[0]).getChannel(),

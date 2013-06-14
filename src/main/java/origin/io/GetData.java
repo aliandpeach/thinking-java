@@ -13,9 +13,11 @@ public class GetData {
 		ByteBuffer bb = ByteBuffer.allocate(BSIZE);
 		// Allocation automatically zeroes the ByteBuffer:
 		int i = 0;
-		while (i++ < bb.limit())
+        System.out.println(bb.limit());
+        while (i++ < bb.limit()) {
 			if (bb.get() != 0)
 				print("nonzero");
+        }
 		print("i = " + i);
 		bb.rewind();
 		// Store and read a char array:
