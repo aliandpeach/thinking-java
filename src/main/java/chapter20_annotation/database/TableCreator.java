@@ -1,6 +1,6 @@
-//: annotations/database/TableCreator.java
+//: origin.annotations/database/TableCreator.java
 // Reflection-based annotation processor.
-// {Args: annotations.database.Member}
+// {Args: origin.annotations.database.Member}
 package chapter20_annotation.database;
 
 import java.lang.annotation.Annotation;
@@ -26,7 +26,7 @@ public class TableCreator {
             Class<?> cl = Class.forName(className);
             DBTable dbTable = cl.getAnnotation(DBTable.class);
             if (dbTable == null) {
-                System.out.println("No DBTable annotations in class "
+                System.out.println("No DBTable origin.annotations in class "
                         + className);
                 continue;
             }
@@ -85,12 +85,12 @@ public class TableCreator {
         return constraints;
     }
 } /*
- * Output: Table Creation SQL for annotations.database.Member is : CREATE TABLE
+ * Output: Table Creation SQL for origin.annotations.database.Member is : CREATE TABLE
  * MEMBER( FIRSTNAME VARCHAR(30)); Table Creation SQL for
- * annotations.database.Member is : CREATE TABLE MEMBER( FIRSTNAME VARCHAR(30),
- * LASTNAME VARCHAR(50)); Table Creation SQL for annotations.database.Member is
+ * origin.annotations.database.Member is : CREATE TABLE MEMBER( FIRSTNAME VARCHAR(30),
+ * LASTNAME VARCHAR(50)); Table Creation SQL for origin.annotations.database.Member is
  * : CREATE TABLE MEMBER( FIRSTNAME VARCHAR(30), LASTNAME VARCHAR(50), AGE INT);
- * Table Creation SQL for annotations.database.Member is : CREATE TABLE MEMBER(
+ * Table Creation SQL for origin.annotations.database.Member is : CREATE TABLE MEMBER(
  * FIRSTNAME VARCHAR(30), LASTNAME VARCHAR(50), AGE INT, HANDLE VARCHAR(30)
  * PRIMARY KEY);
  */// :~

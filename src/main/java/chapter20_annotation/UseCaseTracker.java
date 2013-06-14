@@ -1,4 +1,4 @@
-package chapter20_annotation;//: annotations/UseCaseTracker.java
+package chapter20_annotation;//: origin.annotations/UseCaseTracker.java
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 //: net/mindview/atunit/AtUnitRemover.java
-// Displays @Unit annotations in compiled class files. If
-// first argument is "-r", @Unit annotations are removed.
+// Displays @Unit origin.annotations in compiled class files. If
+// first argument is "-r", @Unit origin.annotations are removed.
 // {Args: ..}
 // {Requires: javassist.bytecode.ClassFile;
 // You must install the Javassist library from

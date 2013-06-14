@@ -1,4 +1,4 @@
-//: annotations/database/SQLString.java
+//: origin.annotations/database/SQLString.java
 package chapter20_annotation.database;
 
 import java.lang.annotation.ElementType;

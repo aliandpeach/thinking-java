@@ -1,4 +1,4 @@
-//: annotations/database/DBTable.java
+//: origin.annotations/database/DBTable.java
 package chapter20_annotation.database;
 
 import java.lang.annotation.ElementType;

@@ -15,10 +15,7 @@
  */
 package chapter02_demo;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Description of this file.
@@ -33,6 +30,13 @@ public class Test {
         String strClassPath = System.getProperty("java.class.path");
 
         System.out.println("Classpath is " + strClassPath);
+
+        new Timer("timer").schedule(new TimerTask() {
+            @Override
+            public void run() {
+                System.out.println("执行任务");
+            }
+        }, 1000L, 1000L);
     }
 
     /**

@@ -86,7 +86,7 @@ public class Examples {
         System.out.println("Get monthOfYear:      in.getMonthOfYear():      " + in.getMonthOfYear());
         System.out.println("Get dayOfMonth:       in.getDayOfMonth():       " + in.getDayOfMonth());
         System.out.println("...");
-        System.out.println("Property access:      in.dayOfWeek().get():                   " + in.dayOfWeek().get());
+        System.out.println("Property origin.access:      in.dayOfWeek().get():                   " + in.dayOfWeek().get());
         System.out.println("Day of week as text:  in.dayOfWeek().getAsText():             " + in.dayOfWeek().getAsText());
         System.out.println("Day as short text:    in.dayOfWeek().getAsShortText():        " + in.dayOfWeek().getAsShortText());
         System.out.println("Day in french:        in.dayOfWeek().getAsText(Locale.FRENCH):" + in.dayOfWeek().getAsText(Locale.FRENCH));

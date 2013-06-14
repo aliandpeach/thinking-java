@@ -1,4 +1,4 @@
-package chapter20_annotation;//: annotations/UseCase.java
+package chapter20_annotation;//: origin.annotations/UseCase.java
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

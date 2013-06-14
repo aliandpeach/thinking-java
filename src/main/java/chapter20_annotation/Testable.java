@@ -1,4 +1,4 @@
-//: annotations/Testable.java
+//: origin.annotations/Testable.java
 package chapter20_annotation;
 
 import net.mindview.atunit.*;

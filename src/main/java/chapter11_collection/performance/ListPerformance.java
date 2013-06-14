@@ -55,7 +55,7 @@ public class ListPerformance {
 			int test(List<Integer> list, TestParam tp) {
 				int loops = tp.loops;
 				for (int i = 0; i < loops; i++)
-					list.add(5, 47); // Minimize random-access cost
+					list.add(5, 47); // Minimize random-origin.access cost
 				return loops;
 			}
 		});
@@ -67,7 +67,7 @@ public class ListPerformance {
 					list.clear();
 					list.addAll(new CountingIntegerList(size));
 					while (list.size() > 5)
-						list.remove(5); // Minimize random-access cost
+						list.remove(5); // Minimize random-origin.access cost
 				}
 				return loops * size;
 			}

@@ -330,9 +330,9 @@ public class DateTimeBrowser extends JFrame {
     } // end of addMenus
 
     /*
-     * A private method to dump the arrays of Object[][]
+     * A private method to dump the origin.arrays of Object[][]
      * if desired by the developer
-     * @param objs The array of arrays to be dumped.
+     * @param objs The array of origin.arrays to be dumped.
      */
     private void dumpObjs(Object[][] objs, PrintStream out ) {
         for (int i = 0; i < objs.length; ++i) {
@@ -509,7 +509,7 @@ public class DateTimeBrowser extends JFrame {
 
     /*
      * TableView This abstract class defines the operations
-     * necessary to create and access the Object arrays
+     * necessary to create and origin.access the Object origin.arrays
      * required to create a JTable.
      */
     private abstract class TableView {
@@ -555,7 +555,7 @@ public class DateTimeBrowser extends JFrame {
             Object[][] retValues = null;
             /*
              * Create an array of Objects that will contain
-             * other arrays of Objects. (This is the 'column'
+             * other origin.arrays of Objects. (This is the 'column'
              * array).
              */
             ArrayList fileStrings = lddFile.getFileStrings();
@@ -565,7 +565,7 @@ public class DateTimeBrowser extends JFrame {
             int numCols = colNames.length;
             // System.err.println("NumCols : " + numCols);
             /*
-             * Prime the array of arrays of Objects, allocating a new
+             * Prime the array of origin.arrays of Objects, allocating a new
              * secondary array for each of the primary array's
              * elements.
              */
@@ -672,7 +672,7 @@ public class DateTimeBrowser extends JFrame {
             Object[][] retValues = null;
             /*
              * Create an array of Objects that will contain
-             * other arrays of Objects. (This is the 'column'
+             * other origin.arrays of Objects. (This is the 'column'
              * array).
              */
             ArrayList fileStrings = lddFile.getFileStrings();
@@ -684,7 +684,7 @@ public class DateTimeBrowser extends JFrame {
             String fs = "yyyy-MM-dd'T'HH:mm:ss";
             DateFormat df = new SimpleDateFormat( fs );
             /*
-             * Prime the array of arrays of Objects, allocating a new
+             * Prime the array of origin.arrays of Objects, allocating a new
              * secondary array for each of the primary array's
              * elements.
              */
@@ -793,7 +793,7 @@ public class DateTimeBrowser extends JFrame {
             Object[][] retValues = null;
             /*
              * Create an array of Objects that will contain
-             * other arrays of Objects. (This is the 'column'
+             * other origin.arrays of Objects. (This is the 'column'
              * array).
              */
             ArrayList fileStrings = lddFile.getFileStrings();
@@ -803,7 +803,7 @@ public class DateTimeBrowser extends JFrame {
             int numCols = colNames.length;
             // System.err.println("NumCols : " + numCols);
             /*
-             * Prime the array of arrays of Objects, allocating a new
+             * Prime the array of origin.arrays of Objects, allocating a new
              * secondary array for each of the primary array's
              * elements.
              */
@@ -904,7 +904,7 @@ public class DateTimeBrowser extends JFrame {
             Object[][] retValues = null;
             /*
              * Create an array of Objects that will contain
-             * other arrays of Objects. (This is the 'column'
+             * other origin.arrays of Objects. (This is the 'column'
              * array).
              */
             ArrayList fileStrings = lddFile.getFileStrings();
@@ -914,7 +914,7 @@ public class DateTimeBrowser extends JFrame {
             int numCols = colNames.length;
             // System.err.println("NumCols : " + numCols);
             /*
-             * Prime the array of arrays of Objects, allocating a new
+             * Prime the array of origin.arrays of Objects, allocating a new
              * secondary array for each of the primary array's
              * elements.
              */

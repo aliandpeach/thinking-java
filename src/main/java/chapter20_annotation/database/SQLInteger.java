@@ -1,4 +1,4 @@
-//: annotations/database/SQLInteger.java
+//: origin.annotations/database/SQLInteger.java
 package chapter20_annotation.database;
 
 import java.lang.annotation.*;

@@ -1,7 +1,7 @@
-//: annotations/database/TableCreationProcessorFactory.java
+//: origin.annotations/database/TableCreationProcessorFactory.java
 // The database example using Visitor.
 // {Exec: apt -factory
-// annotations.database.TableCreationProcessorFactory
+// origin.annotations.database.TableCreationProcessorFactory
 // database/Member.java -s database}
 package chapter20_annotation.database;
 
@@ -31,10 +31,10 @@ public class TableCreationProcessorFactory implements
     }
 
     public Collection<String> supportedAnnotationTypes() {
-        return Arrays.asList("annotations.database.DBTable",
-                "annotations.database.Constraints",
-                "annotations.database.SQLString",
-                "annotations.database.SQLInteger");
+        return Arrays.asList("origin.annotations.database.DBTable",
+                "origin.annotations.database.Constraints",
+                "origin.annotations.database.SQLString",
+                "origin.annotations.database.SQLInteger");
     }
 
     public Collection<String> supportedOptions() {
