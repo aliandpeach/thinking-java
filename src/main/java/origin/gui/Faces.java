@@ -12,11 +12,11 @@ public class Faces extends JFrame {
 	private boolean mad = false;
 
 	public Faces() {
-		faces = new Icon[] { new ImageIcon(getClass().getResource("Face0.gif")),
-				new ImageIcon(getClass().getResource("Face1.gif")),
-				new ImageIcon(getClass().getResource("Face2.gif")),
-				new ImageIcon(getClass().getResource("Face3.gif")),
-				new ImageIcon(getClass().getResource("Face4.gif")), };
+		faces = new Icon[] { new ImageIcon(getClass().getResource("/images/Face0.gif")),
+				new ImageIcon(getClass().getResource("/images/Face1.gif")),
+				new ImageIcon(getClass().getResource("/images/Face2.gif")),
+				new ImageIcon(getClass().getResource("/images/Face3.gif")),
+				new ImageIcon(getClass().getResource("/images/Face4.gif")), };
 		jb = new JButton("JButton", faces[3]);
 		setLayout(new FlowLayout());
 		jb.addActionListener(new ActionListener() {
