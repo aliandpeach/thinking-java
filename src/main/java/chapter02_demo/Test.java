@@ -30,9 +30,16 @@ public class Test {
     public static final Map<String,String> A = new HashMap<String,String>();
 
     public static void main(String[] args) {
-        String strClassPath = System.getProperty("java.class.path");
-
-        System.out.println("Classpath is " + strClassPath);
+        aa:
+        for (int i =0; i< 2; i++) {
+            System.out.println(i);
+            for (int j = 0; j < 3; j++) {
+                System.out.println(j);
+                if (j == 2)
+                    break aa;
+            }
+        }
+        System.out.println("dood");
     }
 
     /**
