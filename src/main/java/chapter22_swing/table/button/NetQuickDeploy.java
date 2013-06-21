@@ -23,6 +23,9 @@ package chapter22_swing.table.button;
  * @since 13-6-16
  */
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.table.AbstractTableModel;
@@ -30,29 +33,112 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.*;
 import java.util.LinkedList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class NetQuickDeploy {
+    Logger log = LoggerFactory.getLogger(NetQuickDeploy.class);
     public static void main(String[] args) {
         UIUtils.setUI();
         final NetQuickDeploy example = new NetQuickDeploy();
+        final LinkedList<DeployConfig> deployConfigs = example.loadConfig();
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                example.createAndShowGUI();
+                example.createAndShowGUI(deployConfigs);
             }
         });
     }
 
-    private JTable table;
+    /**
+     * 从home目录加载配置文件configs.conf
+     * @return configs
+     */
+    private LinkedList<DeployConfig> loadConfig() {
+        LinkedList<DeployConfig> result = new LinkedList<DeployConfig>();
+        BufferedReader reader = null;
+        try {
+            String configFile = System.getProperty("user.home") + File.separator + "quickDeploy.conf";
+            log.info("从home目录加载配置文件:" + configFile);
+            File file = new File(configFile);
+            if (file.createNewFile()) {
+                return result;
+            }
+            reader = new BufferedReader(new FileReader(file));
+            String s;
+            while ((s = reader.readLine()) != null) {
+                String[] eachConfig = s.split(";");
+                if (eachConfig.length < 8)
+                    continue;
+                DeployConfig each = new DeployConfig(
+                        eachConfig[0],eachConfig[1],eachConfig[2],eachConfig[3],
+                        eachConfig[4],eachConfig[5],eachConfig[6],eachConfig[7]);
+                result.add(each);
+            }
+        } catch (IOException e) {
+            log.error("从home目录加载配置文件IOException", e);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    log.error("从home目录加载配置文件关闭流出错", e);
+                }
+            }
+        }
+        return result;
+    }
 
-    private void createAndShowGUI() {
-        JFrame frame = new JFrame("net快发（熊能@保网 作品）");
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        LinkedList<DeployConfig> deployConfigs = new LinkedList<DeployConfig>() {{
-            add(new DeployConfig("go2配置", "D:\\work\\config\\path\\aaa\\bbb\\ccc",
-                    "D:\\work\\configpath\\aaa\\bbb\\ccc", "10.68.14.68", "root",
-                    "cninsure187", "/data/www/ins_share/config/go2/haha", "grails"));
-        }};
+    /**
+     * 后台更新配置线程池
+     */
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    private void updateConfig(LinkedList<DeployConfig> data) {
+        BufferedWriter writer = null;
+        try {
+            String configFile = System.getProperty("user.home") + File.separator + "quickDeploy.conf";
+            writer = new BufferedWriter(new FileWriter(configFile));
+            if (data != null && data.size() > 0) {
+                for (DeployConfig each : data) {
+                    writer.append(each.getDesc()).append(";");
+                    writer.append(each.getLocalConfigPath()).append(";");
+                    writer.append(each.getLocalProjectPath()).append(";");
+                    writer.append(each.getServerIp()).append(";");
+                    writer.append(each.getUsername()).append(";");
+                    writer.append(each.getPassword()).append(";");
+                    writer.append(each.getRemoteConfigPath()).append(";");
+                    writer.append(each.getProjectType());
+                    writer.newLine();
+                }
+                writer.flush();
+            }
+        } catch (IOException e) {
+            log.error("后台更新配置线程池IOException", e);
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    log.error("后台更新配置线程池关闭出错", e);
+                }
+            }
+        }
+    }
+
+    private JTable table;
+    private ConfigDialog configDialog;
+
+    private void createAndShowGUI(LinkedList<DeployConfig> deployConfigs) {
+        JFrame frame = new JFrame("net快发（by 一刀@保网）");
+        frame.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                System.exit(0);
+            }
+        });
         table = new JTable(new DeployTableModel(deployConfigs));
         JScrollPane scrollPane = new JScrollPane(table);
 
@@ -106,7 +192,22 @@ public class NetQuickDeploy {
         table.setShowGrid(true);
         table.setGridColor(Color.BLUE);
         table.setBorder(new EtchedBorder(EtchedBorder.RAISED));
+        configDialog = new ConfigDialog(frame, true);
+        configDialog.setSize(600, 350);
+        configDialog.setResizable(false);
+        JPanel headPanel = new JPanel();
+        headPanel.setLayout(new BoxLayout(headPanel, BoxLayout.Y_AXIS));
+        JButton newButton = new JButton("新建配置");
+        newButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        newButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                configDialog.popup(-1);
+            }
+        });
+        headPanel.add(newButton);
 
+        frame.getContentPane().add(headPanel, BorderLayout.NORTH);
         frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
         frame.getContentPane().setPreferredSize(new Dimension(1310, 650));
         frame.pack();
@@ -188,8 +289,7 @@ public class NetQuickDeploy {
                     final JButton editButton = new JButton("修改");
                     editButton.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent arg0) {
-                            data.add(new DeployConfig());
-                            fireTableRowsInserted(rowIndex + 1, rowIndex + 1);
+                            configDialog.popup(rowIndex);
                         }
                     });
                     return editButton;
@@ -203,6 +303,13 @@ public class NetQuickDeploy {
                                 data.remove(rowIndex);
                                 // trigger that fire... method
                                 fireTableRowsDeleted(rowIndex, rowIndex);
+                                // 后台开始更新配置
+                                executor.submit(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        updateConfig(data);
+                                    }
+                                });
                             }
                         }
                     });
@@ -212,11 +319,10 @@ public class NetQuickDeploy {
                     configButton.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent arg0) {
                             int confirm = JOptionPane.showConfirmDialog(
-                                    table, "你确定要删除吗？", "确认框", JOptionPane.YES_NO_OPTION);
+                                    table, "你确定要发布配置文件吗？", "确认框", JOptionPane.YES_NO_OPTION);
                             if (confirm == JOptionPane.YES_OPTION) {
-                                data.remove(rowIndex);
-                                // trigger that fire... method
-                                fireTableRowsDeleted(rowIndex, rowIndex);
+                                // todo
+                                System.out.println("确定要发布配置文件");
                             }
                         }
                     });
@@ -226,11 +332,10 @@ public class NetQuickDeploy {
                     projectButton.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent arg0) {
                             int confirm = JOptionPane.showConfirmDialog(
-                                    table, "你确定要删除吗？", "确认框", JOptionPane.YES_NO_OPTION);
+                                    table, "你确定要发布工程吗？", "确认框", JOptionPane.YES_NO_OPTION);
                             if (confirm == JOptionPane.YES_OPTION) {
-                                data.remove(rowIndex);
-                                // trigger that fire... method
-                                fireTableRowsDeleted(rowIndex, rowIndex);
+                                // todo
+                                System.out.println("确定要发布工程");
                             }
                         }
                     });
@@ -240,11 +345,10 @@ public class NetQuickDeploy {
                     configProjectButton.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent arg0) {
                             int confirm = JOptionPane.showConfirmDialog(
-                                    table, "你确定要删除吗？", "确认框", JOptionPane.YES_NO_OPTION);
+                                    table, "你确定要发布配置+工程吗？", "确认框", JOptionPane.YES_NO_OPTION);
                             if (confirm == JOptionPane.YES_OPTION) {
-                                data.remove(rowIndex);
-                                // trigger that fire... method
-                                fireTableRowsDeleted(rowIndex, rowIndex);
+                                // todo
+                                System.out.println("确定要发布配置+工程");
                             }
                         }
                     });
@@ -255,58 +359,99 @@ public class NetQuickDeploy {
         }
     }
 
-    private class AddressDialog extends JDialog {
-        JLabel label1 = new JLabel("配置描述");
-        JLabel label2 = new JLabel("本地配置文件根目录");
-        JLabel label3 = new JLabel("本地工程根目录");
-        JLabel label4 = new JLabel("服务器IP地址");
-        JLabel label5 = new JLabel("服务器用户名");
-        JLabel label6 = new JLabel("服务器密码");
-        JLabel label7 = new JLabel("服务器配置文件根目录");
-        JLabel label8 = new JLabel("发布的工程类型");
+    /**
+     * 修改发布配置的对话框
+     */
+    private class ConfigDialog extends JDialog {
+        private JLabel label1 = new JLabel("配置描述：", SwingConstants.RIGHT);
+        private JLabel label2 = new JLabel("本地配置文件根目录：", SwingConstants.RIGHT);
+        private JLabel label3 = new JLabel("本地工程根目录：", SwingConstants.RIGHT);
+        private JLabel label4 = new JLabel("服务器IP地址：", SwingConstants.RIGHT);
+        private JLabel label5 = new JLabel("服务器用户名：", SwingConstants.RIGHT);
+        private JLabel label6 = new JLabel("服务器密码：", SwingConstants.RIGHT);
+        private JLabel label7 = new JLabel("服务器配置文件根目录：", SwingConstants.RIGHT);
+        private JLabel label8 = new JLabel("发布的工程类型：", SwingConstants.RIGHT);
 
-        JButton yesButton = new JButton("确定");
-        JButton cancelButton = new JButton("取消");
+        private JButton yesButton = new JButton("确定");
+        private JButton cancelButton = new JButton("取消");
 
-        JTextField descField = new JTextField();
-        JTextField localConfigPathField = new JTextField();
-        JTextField localProjectPathField = new JTextField();
-        JTextField serverIpField = new JTextField();
-        JTextField usernameField = new JTextField();
-        JPasswordField passwordField = new JPasswordField();
-        JTextField remoteConfigPathField = new JTextField();
-        JComboBox<String> projectTypeField = new JComboBox<String>(new String[]{"grails", "maven"});
+        private JTextField descField = new JTextField();
+        private JTextField localConfigPathField = new JTextField();
+        private JTextField localProjectPathField = new JTextField();
+        private JTextField serverIpField = new JTextField();
+        private JTextField usernameField = new JTextField();
+        private JPasswordField passwordField = new JPasswordField();
+        private JTextField remoteConfigPathField = new JTextField();
+        private JComboBox<String> projectTypeField = new JComboBox<String>(
+                new String[]{Constants.PRO_TYPE_GRAILS, Constants.PRO_TYPE_MAVEN});
+        // 表格第几行被选中，-1代表新建
+        private int rowSelect;
 
-        public AddressDialog(Frame owner, boolean modal) {
+        public ConfigDialog(Frame owner, boolean modal) {
             super(owner, modal);
             init();
         }
 
         private void init() {
             this.setTitle("发布配置对话框");
-            this.setLayout(new GridLayout(9, 2));
-            this.add(label1);
-            this.add(descField);
-            this.add(label2);
-            this.add(localConfigPathField);
-            this.add(label3);
-            this.add(localProjectPathField);
-            this.add(label4);
-            this.add(serverIpField);
-            this.add(label5);
-            this.add(usernameField);
-            this.add(label6);
-            this.add(passwordField);
-            this.add(label7);
-            this.add(remoteConfigPathField);
-            this.add(label8);
-            this.add(projectTypeField);
-            this.add(yesButton);
-            this.add(cancelButton);
+            this.setLayout(new GridLayout(2, 1));
+
+            JPanel configPanel = new JPanel(new GridLayout(8, 2));
+            configPanel.add(label1);
+            configPanel.add(descField);
+            configPanel.add(label2);
+            configPanel.add(localConfigPathField);
+            configPanel.add(label3);
+            configPanel.add(localProjectPathField);
+            configPanel.add(label4);
+            configPanel.add(serverIpField);
+            configPanel.add(label5);
+            configPanel.add(usernameField);
+            configPanel.add(label6);
+            configPanel.add(passwordField);
+            configPanel.add(label7);
+            configPanel.add(remoteConfigPathField);
+            configPanel.add(label8);
+            configPanel.add(projectTypeField);
+            this.add(configPanel);
+
+            JPanel btnPanel = new JPanel();
+            btnPanel.add(yesButton);
+            btnPanel.add(cancelButton);
+
+            this.add(btnPanel);
+
 
             yesButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                    final DeployTableModel tableModel = ((DeployTableModel)table.getModel());
+                    if (rowSelect < 0) {
+                        DeployConfig editConfig = new DeployConfig(descField.getText(), localConfigPathField.getText(),
+                                localProjectPathField.getText(), serverIpField.getText(), usernameField.getText(),
+                                String.valueOf(passwordField.getPassword()), remoteConfigPathField.getText(),
+                                (String)projectTypeField.getSelectedItem());
+                        tableModel.getData().add(editConfig);
+                        tableModel.fireTableRowsInserted(tableModel.getRowCount(), tableModel.getRowCount());
+                    } else {
+                        DeployConfig selectConfig = tableModel.getData().get(rowSelect);
+                        selectConfig.setDesc(descField.getText());
+                        selectConfig.setLocalConfigPath(localConfigPathField.getText());
+                        selectConfig.setLocalProjectPath(localProjectPathField.getText());
+                        selectConfig.setServerIp(serverIpField.getText());
+                        selectConfig.setUsername(usernameField.getText());
+                        selectConfig.setPassword(String.valueOf(passwordField.getPassword()));
+                        selectConfig.setRemoteConfigPath(remoteConfigPathField.getText());
+                        selectConfig.setProjectType((String)projectTypeField.getSelectedItem());
+                        tableModel.fireTableRowsUpdated(rowSelect, rowSelect);
+                    }
+                    // 后台开始更新配置
+                    executor.submit(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateConfig(tableModel.getData());
+                        }
+                    });
                     setVisible(false);
                 }
             });
@@ -319,15 +464,30 @@ public class NetQuickDeploy {
             });
         }
 
-        public void setValues(DeployConfig deployConfig) {
-            descField.setText(deployConfig.getDesc());
-            localConfigPathField.setText(deployConfig.getLocalConfigPath());
-            localProjectPathField.setText(deployConfig.getLocalProjectPath());
-            serverIpField.setText(deployConfig.getServerIp());
-            usernameField.setText(deployConfig.getUsername());
-            passwordField.setText(deployConfig.getPassword());
-            remoteConfigPathField.setText(deployConfig.getRemoteConfigPath());
-            projectTypeField.setSelectedItem(deployConfig.getProjectType());
+        public void popup(int rowSelect) {
+            this.rowSelect = rowSelect;
+            if (rowSelect >= 0) {
+                DeployConfig deployConfig = ((DeployTableModel)table.getModel()).getData().get(rowSelect);
+                descField.setText(deployConfig.getDesc());
+                localConfigPathField.setText(deployConfig.getLocalConfigPath());
+                localProjectPathField.setText(deployConfig.getLocalProjectPath());
+                serverIpField.setText(deployConfig.getServerIp());
+                usernameField.setText(deployConfig.getUsername());
+                passwordField.setText(deployConfig.getPassword());
+                remoteConfigPathField.setText(deployConfig.getRemoteConfigPath());
+                projectTypeField.setSelectedItem(deployConfig.getProjectType());
+            } else {
+                descField.setText("");
+                localConfigPathField.setText("");
+                localProjectPathField.setText("");
+                serverIpField.setText("");
+                usernameField.setText("");
+                passwordField.setText("");
+                remoteConfigPathField.setText("");
+                projectTypeField.setSelectedIndex(0);
+            }
+            projectTypeField.setEnabled(rowSelect < 0);
+            setVisible(true);
         }
     }
 }
