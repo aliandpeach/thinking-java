@@ -22,13 +22,13 @@ package chapter22_swing.table.button;
  * @version 1.0
  * @since 13-6-16
  */
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -143,6 +143,8 @@ public class NetQuickDeploy {
         JScrollPane scrollPane = new JScrollPane(table);
 
         TableCellRenderer buttonRenderer = new JTableButtonRenderer();
+        JPasswordRender passwordRender = new JPasswordRender();
+        table.getColumn("服务器密码").setCellRenderer(passwordRender);
         table.getColumn("Edit").setCellRenderer(buttonRenderer);
         table.getColumn("Delete").setCellRenderer(buttonRenderer);
         table.getColumn("Config").setCellRenderer(buttonRenderer);
@@ -194,6 +196,7 @@ public class NetQuickDeploy {
         table.setBorder(new EtchedBorder(EtchedBorder.RAISED));
         configDialog = new ConfigDialog(frame, true);
         configDialog.setSize(600, 350);
+        toCenter(configDialog);
         configDialog.setResizable(false);
         JPanel headPanel = new JPanel();
         headPanel.setLayout(new BoxLayout(headPanel, BoxLayout.Y_AXIS));
@@ -211,6 +214,7 @@ public class NetQuickDeploy {
         frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
         frame.getContentPane().setPreferredSize(new Dimension(1310, 650));
         frame.pack();
+        toCenter(frame);
         frame.setVisible(true);
     }
 
@@ -360,6 +364,20 @@ public class NetQuickDeploy {
     }
 
     /**
+     * 居中显示
+     * @param window
+     */
+    private void toCenter(Window window) {
+        Toolkit kit = Toolkit.getDefaultToolkit();    // 定义工具包
+        Dimension screenSize = kit.getScreenSize();   // 获取屏幕的尺寸
+        int screenWidth = screenSize.width/2;         // 获取屏幕的宽
+        int screenHeight = screenSize.height/2;       // 获取屏幕的高
+        int height = window.getHeight();
+        int width = window.getWidth();
+        window.setLocation(screenWidth-width/2, screenHeight-height/2);
+    }
+
+    /**
      * 修改发布配置的对话框
      */
     private class ConfigDialog extends JDialog {
@@ -394,33 +412,35 @@ public class NetQuickDeploy {
 
         private void init() {
             this.setTitle("发布配置对话框");
-            this.setLayout(new GridLayout(2, 1));
+            this.setLayout(new GridBagLayout());
+            int height = 8;
+            int lableWidth = 100;
+            int textWidth = 400;
+            JPanel configPanel = new JPanel(new GridBagLayout());
+            configPanel.add(label1, new GBC(0, 0).setIpad(lableWidth, height).setAnchor(GBC.EAST));
+            configPanel.add(descField, new GBC(1, 0).setIpad(textWidth, height).setAnchor(GBC.WEST));
+            configPanel.add(label2, new GBC(0, 1).setIpad(lableWidth, height).setAnchor(GBC.EAST));
+            configPanel.add(localConfigPathField, new GBC(1, 1).setIpad(textWidth, height).setAnchor(GBC.WEST));
+            configPanel.add(label3, new GBC(0, 2).setIpad(lableWidth, height).setAnchor(GBC.EAST));
+            configPanel.add(localProjectPathField, new GBC(1, 2).setIpad(textWidth, height).setAnchor(GBC.WEST));
+            configPanel.add(label4, new GBC(0, 3).setIpad(lableWidth, height).setAnchor(GBC.EAST));
+            configPanel.add(serverIpField, new GBC(1, 3).setIpad(textWidth, height).setAnchor(GBC.WEST));
+            configPanel.add(label5, new GBC(0, 4).setIpad(lableWidth, height).setAnchor(GBC.EAST));
+            configPanel.add(usernameField, new GBC(1, 4).setIpad(textWidth, height).setAnchor(GBC.WEST));
+            configPanel.add(label6, new GBC(0, 5).setIpad(lableWidth, height).setAnchor(GBC.EAST));
+            configPanel.add(passwordField, new GBC(1, 5).setIpad(textWidth, height).setAnchor(GBC.WEST));
+            configPanel.add(label7, new GBC(0, 6).setIpad(lableWidth, height).setAnchor(GBC.EAST));
+            configPanel.add(remoteConfigPathField, new GBC(1, 6).setIpad(textWidth, height).setAnchor(GBC.WEST));
+            configPanel.add(label8, new GBC(0, 7).setIpad(lableWidth, height).setAnchor(GBC.EAST));
+            configPanel.add(projectTypeField, new GBC(1, 7).setIpad(textWidth, height).setAnchor(GBC.WEST));
+            this.add(configPanel, new GBC(0, 0).setFill(GBC.BOTH).setInsets(5));
 
-            JPanel configPanel = new JPanel(new GridLayout(8, 2));
-            configPanel.add(label1);
-            configPanel.add(descField);
-            configPanel.add(label2);
-            configPanel.add(localConfigPathField);
-            configPanel.add(label3);
-            configPanel.add(localProjectPathField);
-            configPanel.add(label4);
-            configPanel.add(serverIpField);
-            configPanel.add(label5);
-            configPanel.add(usernameField);
-            configPanel.add(label6);
-            configPanel.add(passwordField);
-            configPanel.add(label7);
-            configPanel.add(remoteConfigPathField);
-            configPanel.add(label8);
-            configPanel.add(projectTypeField);
-            this.add(configPanel);
+            JPanel btnPanel = new JPanel(new GridBagLayout());
+            btnPanel.add(yesButton, new GBC(0, 0).setIpad(30, 8).setAnchor(GBC.EAST));
+            btnPanel.add(cancelButton, new GBC(1, 0).setIpad(30, 8).setAnchor(GBC.WEST));
+            btnPanel.add(new JLabel(""), new GBC(0, 1, 2, 1).setInsets(10));
 
-            JPanel btnPanel = new JPanel();
-            btnPanel.add(yesButton);
-            btnPanel.add(cancelButton);
-
-            this.add(btnPanel);
-
+            this.add(btnPanel, new GBC(0, 1));
 
             yesButton.addActionListener(new ActionListener() {
                 @Override
@@ -488,6 +508,13 @@ public class NetQuickDeploy {
             }
             projectTypeField.setEnabled(rowSelect < 0);
             setVisible(true);
+        }
+    }
+
+    private class JPasswordRender extends DefaultTableCellRenderer {
+        @Override
+        protected void setValue(Object value) {
+            setText((value == null) ? "" : value.toString().replaceAll(".", "*"));
         }
     }
 }
