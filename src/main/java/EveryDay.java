@@ -64,6 +64,10 @@ public class EveryDay {
             stm = cn.createStatement();
             ResultSet rs = stm.executeQuery(SELECT_SQL);
             BufferedWriter writer = new BufferedWriter(new FileWriter(outFile));
+            writer.append("------这是系统自动发送的邮件正文！------");
+            writer.append("------所有过期的单的询价号和有效日期为：------");
+            writer.newLine();
+            writer.newLine();
             while (rs.next()) {
                 String bizId = rs.getString("bizId");
                 String effectDate = rs.getString("effectDate");
