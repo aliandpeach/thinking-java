@@ -15,10 +15,10 @@
  */
 package chapter05_object;
 
-import chapter04_common.model.Color;
-import chapter04_common.model.ColoredPoint;
-import chapter04_common.model.MutablePoint;
-import chapter04_common.model.ReadonlyPoint;
+import ch01_model.Color;
+import ch01_model.ColoredPoint;
+import ch01_model.MutablePoint;
+import ch01_model.ReadonlyPoint;
 
 import java.util.HashSet;
 import java.util.Iterator;

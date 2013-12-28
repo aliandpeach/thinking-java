@@ -1,6 +1,7 @@
 package chapter07_math;
 
 
+import chapter01_basic.Arith;
 import org.junit.Test;
 
 /**
