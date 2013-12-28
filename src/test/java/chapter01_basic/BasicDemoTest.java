@@ -1,4 +1,4 @@
-package chapter06_demo;
+package chapter01_basic;
 
 import chapter01_basic.BasicDemo;
 import org.junit.Test;

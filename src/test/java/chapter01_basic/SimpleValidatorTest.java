@@ -1,5 +1,5 @@
 /*
- * Created on 13-3-25
+ * Created on 13-4-25
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,25 +13,21 @@
  * 
  * Copyright @2013 the original author or authors.
  */
-package ch01_model;
+package chapter01_basic;
 
-import ch01_model.*;
+import chapter09_samples.regex.SimpleValidator;
+import org.junit.Test;
 
 /**
  * Description of this file.
  *
  * @author XiongNeng
  * @version 1.0
- * @since 13-3-25
+ * @since 13-4-25
  */
-public class PersonSon extends Person {
-    private String sonName;
-
-    public String getSonName() {
-        return sonName;
-    }
-
-    public void setSonName(String sonName) {
-        this.sonName = sonName;
+public class SimpleValidatorTest {
+    @Test
+    public void testValidate() throws Exception {
+        System.out.println(new SimpleValidator().validate("公无"));
     }
 }
