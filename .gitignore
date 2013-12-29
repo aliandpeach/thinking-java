@@ -1,6 +1,7 @@
 target/
 .idea/
+code7/
+exercise7/
 *.iml
 *.ipr
 *.iws
-atlassian-ide-plugin.xml
