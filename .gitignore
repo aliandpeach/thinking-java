@@ -6,7 +6,6 @@ target/
 .idea/
 code7/
 exercise7/
-.idea/
 *.iml
 *.ipr
 *.iws

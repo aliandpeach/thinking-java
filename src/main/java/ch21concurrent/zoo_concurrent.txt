@@ -1,0 +1,7 @@
+>> Thread类包含interrupt()方法，用来设置线程中断状态。如果一个线程已经被阻塞，或者试图执行一个阻塞操作，
+那么设置这个线程的中断状态将抛出InterruptedException，当抛出异常或者该任务调用Thread.interrupted()时候，
+中断状态被复位。因此，Thread.interrupted()提供了离开run()循环而不抛出异常的第二种方式。
+
+>> 不能中断synchronized和IO阻塞任务，其实就是不能中断任何要求抛出InterruptedException的调用。
+
+>> 还是nio比较NB，找个时间捣鼓下
