@@ -1,9 +1,11 @@
 package ch14reflect;//: ch15generic.typeinfo/SimpleDynamicProxy.java
 
-import ch15generic.typeinfo.itf.Interface;
+import ch15generic.typeinfo.Interface;
 import ch15generic.typeinfo.pojo.RealObject;
 
-import java.lang.reflect.*;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 /**
  * Java动态代理
