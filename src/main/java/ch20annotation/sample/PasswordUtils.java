@@ -1,4 +1,4 @@
-package ch20annotation;//: annotations/PasswordUtils.java
+package ch20annotation.sample;//: annotations/PasswordUtils.java
 
 import java.util.List;
 

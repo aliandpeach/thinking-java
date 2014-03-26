@@ -1,4 +1,4 @@
-package ch20annotation;//: annotations/UseCase.java
+package ch20annotation.sample;//: annotations/UseCase.java
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

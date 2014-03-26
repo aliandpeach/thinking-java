@@ -1,5 +1,6 @@
 package ch20annotation;
 
+import ch20annotation.sample.UseCaseTracker;
 import org.junit.Test;
 
 /**

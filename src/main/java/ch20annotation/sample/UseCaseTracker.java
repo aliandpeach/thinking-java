@@ -1,4 +1,4 @@
-package ch20annotation;//: annotations/UseCaseTracker.java
+package ch20annotation.sample;//: annotations/UseCaseTracker.java
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
