@@ -1,5 +1,5 @@
 /*
- * Created on 13-4-25
+ * Created on 13-3-30
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,21 +13,40 @@
  * 
  * Copyright @2013 the original author or authors.
  */
-package ch01basic;
-
-import ch13string.regex.SimpleValidator;
-import org.junit.Test;
+package ch13string.regex;
 
 /**
  * Description of this file.
  *
  * @author XiongNeng
  * @version 1.0
- * @since 13-4-25
+ * @since 13-3-30
  */
-public class SimpleValidatorTest {
-    @Test
-    public void testValidate() throws Exception {
-        System.out.println(new SimpleValidator().validate("公无"));
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class SimpleValidator {
+
+    private Pattern pattern;
+    private Matcher matcher;
+
+    private static final String SIMPLE_PATTERN = "[a-zA-Z0-9\\*\\-/\\s公无]*";
+
+    public SimpleValidator() {
+        pattern = Pattern.compile(SIMPLE_PATTERN);
+    }
+
+    /**
+     * Validate hex with regular expression
+     *
+     * @param hex hex for validation
+     * @return true valid hex, false invalid hex
+     */
+    public boolean validate(final String hex) {
+
+        matcher = pattern.matcher(hex);
+        return matcher.matches();
+
     }
 }

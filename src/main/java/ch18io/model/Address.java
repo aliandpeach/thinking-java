@@ -1,5 +1,5 @@
 /*
- * Created on 13-4-25
+ * Created on 13-3-29
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,21 +13,45 @@
  * 
  * Copyright @2013 the original author or authors.
  */
-package ch01basic;
-
-import ch13string.regex.SimpleValidator;
-import org.junit.Test;
+package ch18io.model;
 
 /**
  * Description of this file.
  *
  * @author XiongNeng
  * @version 1.0
- * @since 13-4-25
+ * @since 13-3-29
  */
-public class SimpleValidatorTest {
-    @Test
-    public void testValidate() throws Exception {
-        System.out.println(new SimpleValidator().validate("公无"));
+
+import java.io.Serializable;
+
+public class Address implements Serializable {
+
+    String street;
+    String country;
+
+    public void setStreet(String street) {
+        this.street = street;
     }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getStreet() {
+        return this.street;
+    }
+
+    public String getCountry() {
+        return this.country;
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuffer(" Street : ")
+                .append(this.street)
+                .append(" Country : ")
+                .append(this.country).toString();
+    }
+
 }

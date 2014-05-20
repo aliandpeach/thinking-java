@@ -1,5 +1,5 @@
 /*
- * Created on 13-4-25
+ * Created on 13-3-29
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,21 +13,33 @@
  * 
  * Copyright @2013 the original author or authors.
  */
-package ch01basic;
+package ch18io.file;
 
-import ch13string.regex.SimpleValidator;
-import org.junit.Test;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Description of this file.
  *
  * @author XiongNeng
  * @version 1.0
- * @since 13-4-25
+ * @since 13-3-29
  */
-public class SimpleValidatorTest {
-    @Test
-    public void testValidate() throws Exception {
-        System.out.println(new SimpleValidator().validate("公无"));
+
+public class CreateFileExample {
+    public static void main(String[] args) {
+        try {
+
+            File file = new File("c:\\newfile.txt");
+
+            if (file.createNewFile()) {
+                System.out.println("File is created!");
+            } else {
+                System.out.println("File already exists.");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

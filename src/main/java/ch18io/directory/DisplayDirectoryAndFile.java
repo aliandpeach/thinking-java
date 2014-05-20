@@ -1,5 +1,5 @@
 /*
- * Created on 13-4-25
+ * Created on 13-3-29
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -13,21 +13,31 @@
  * 
  * Copyright @2013 the original author or authors.
  */
-package ch01basic;
-
-import ch13string.regex.SimpleValidator;
-import org.junit.Test;
+package ch18io.directory;
 
 /**
  * Description of this file.
  *
  * @author XiongNeng
  * @version 1.0
- * @since 13-4-25
+ * @since 13-3-29
  */
-public class SimpleValidatorTest {
-    @Test
-    public void testValidate() throws Exception {
-        System.out.println(new SimpleValidator().validate("公无"));
+
+import java.io.File;
+
+public class DisplayDirectoryAndFile {
+
+    public static void main(String args[]) {
+        displayIt(new File("C:\\Downloads"));
+    }
+
+    public static void displayIt(File node) {
+        System.out.println(node.getAbsoluteFile());
+        if (node.isDirectory()) {
+            String[] subNote = node.list();
+            for (String filename : subNote) {
+                displayIt(new File(node, filename));
+            }
+        }
     }
 }
