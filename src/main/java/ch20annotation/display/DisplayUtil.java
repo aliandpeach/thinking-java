@@ -87,7 +87,10 @@ public class DisplayUtil {
         dea.cpu = 0.2;
         dea.name = "dea name";
         dea.uuid = "ADGDDDDDDDDDDDDDDXX";
-        dea.uris = new ArrayList<String>() {{add("api.orchard.com");add("ddd");}};
+        dea.uris = new ArrayList<String>() {{
+            add("api.orchard.com");
+            add("ddd");
+        }};
 
         List<MonitorNode> dList = new ArrayList<>();
         List<MonitorNode> sList = new ArrayList<>();

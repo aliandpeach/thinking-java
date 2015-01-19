@@ -31,7 +31,7 @@ public class InputStreamToStringExample {
         InputStream is = new ByteArrayInputStream("file content".getBytes());
 
         //read it with BufferedReader
-        BufferedReader br = new BufferedReader( new InputStreamReader(is));
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
         StringBuilder sb = new StringBuilder();
         String line;
         while ((line = br.readLine()) != null) {

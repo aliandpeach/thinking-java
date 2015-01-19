@@ -3,7 +3,9 @@
 package ch19enums;
 
 import java.util.*;
+
 import net.mindview.util.*;
+
 import static ch19enums.Input.*;
 import static net.mindview.util.Print.*;
 
@@ -17,6 +19,7 @@ public class VendingMachine {
 
     /**
      * 状态机，自动贩卖机模拟
+     *
      * @param args
      */
     public static void stateMachine(String[] args) {
@@ -25,6 +28,7 @@ public class VendingMachine {
             gen = new FileInputGenerator(args[0]);
         run(gen);
     }
+
     enum StateDuration {
         TRANSIENT
     } // Tagging enum

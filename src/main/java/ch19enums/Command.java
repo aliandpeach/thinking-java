@@ -8,5 +8,5 @@ package ch19enums;
  * To change this template use File | Settings | File Templates.
  */
 interface Command {
-	void action();
+    void action();
 }

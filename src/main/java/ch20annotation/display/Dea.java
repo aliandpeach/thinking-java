@@ -23,6 +23,7 @@ public class Dea {
     public Config config;
     @Display(name = "URIS")
     public List<String> uris;
+
     public static class Config {
         @Display(name = "请求名称")
         public String request_name;
@@ -31,6 +32,7 @@ public class Dea {
         public double price;
         public Logging logging;
     }
+
     public static class Logging {
         @Display(name = "日志级别")
         public String level;

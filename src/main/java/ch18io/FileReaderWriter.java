@@ -33,7 +33,7 @@ public class FileReaderWriter {
             s = new BufferedReader(new InputStreamReader(new FileInputStream(xmlpath), "UTF-8"));
             StringBuilder sb = new StringBuilder();
             String tmp = s.readLine();
-            while (tmp != null ) {
+            while (tmp != null) {
                 sb.append(tmp).append(newline);
                 tmp = s.readLine();
             }
@@ -43,14 +43,14 @@ public class FileReaderWriter {
             all = all.replaceFirst("dbname=\".*?\"", "dbname=\"" + db_name + "\"");
             all = all.replaceFirst("user=\".*?\"", "user=\"" + username + "\"");
             all = all.replaceFirst("pwd=\".*?\"", "pwd=\"" + password + "\"");
-            out = new BufferedWriter( new OutputStreamWriter(new FileOutputStream(xmlpath), "UTF-8"));
+            out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(xmlpath), "UTF-8"));
             out.append(all);
             out.close();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             try {
-                if(s != null) s.close();
+                if (s != null) s.close();
                 if (out != null) out.close();
             } catch (IOException e) {
                 e.printStackTrace();

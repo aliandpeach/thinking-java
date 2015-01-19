@@ -1,6 +1,7 @@
 package ch19enums;//: enumerated/CarWash.java
 
 import java.util.*;
+
 import static net.mindview.util.Print.*;
 
 public class CarWash {
@@ -19,6 +20,7 @@ public class CarWash {
         print(wash);
         wash.washCar();
     }
+
     public enum Cycle {
         UNDERBODY {
             void action() {

@@ -25,12 +25,16 @@ import java.util.Map;
  * @version 1.0
  * @since 12-12-5
  */
-public class TargetDomain implements Serializable{
+public class TargetDomain implements Serializable {
 
     private static final long serialVersionUID = -6126804875224161611L;
-    /** 保险公司id*/
+    /**
+     * 保险公司id
+     */
     String insCompanyId;
-    /**是否是外挂*/
+    /**
+     * 是否是外挂
+     */
     Boolean addon;
     boolean addoff;
     SerialObject serialObject;

@@ -38,7 +38,7 @@ public class ArrayDemo {
         int[] j = new int[7];
         Arrays.fill(i, 10); // 填充数组
         Arrays.fill(j, 10);
-        System.out.println(Arrays.equals(i,j));
+        System.out.println(Arrays.equals(i, j));
     }
 
     /**
@@ -46,7 +46,7 @@ public class ArrayDemo {
      * 数组元素必须实现了Comparable接口
      */
     public void sort() {
-        int[] i = {6,3,5,6,8,9,4,1};
+        int[] i = {6, 3, 5, 6, 8, 9, 4, 1};
         System.out.println("i=" + Arrays.toString(i));
         Arrays.sort(i);
         // 排序完后可以二分查找

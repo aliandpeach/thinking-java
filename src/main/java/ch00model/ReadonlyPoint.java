@@ -48,7 +48,7 @@ public class ReadonlyPoint {
         boolean result = false;
         if (other instanceof ReadonlyPoint) {
             ReadonlyPoint that = (ReadonlyPoint) other;
-            result =(that.canEqual(this) && this.getX() == that.getX() && this.getY() == that.getY());
+            result = (that.canEqual(this) && this.getX() == that.getX() && this.getY() == that.getY());
         }
         return result;
     }

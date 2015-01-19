@@ -410,7 +410,7 @@ public class SpringUtil {
             URL my_url = new URL("http://coolshell.cn/");
             BufferedReader br = new BufferedReader(new InputStreamReader(my_url.openStream()));
             String strTemp = "";
-            while(null != (strTemp = br.readLine())){
+            while (null != (strTemp = br.readLine())) {
                 System.out.println(strTemp);
             }
         } catch (Exception ex) {
@@ -420,18 +420,19 @@ public class SpringUtil {
 
     /**
      * 改变数组的大小
+     *
      * @param oldArray 旧的数组
-     * @param newSize 新的数组大小
+     * @param newSize  新的数组大小
      * @return 新的数组
      */
-    public static Object resizeArray (Object oldArray, int newSize) {
+    public static Object resizeArray(Object oldArray, int newSize) {
         int oldSize = java.lang.reflect.Array.getLength(oldArray);
         Class elementType = oldArray.getClass().getComponentType();
         Object newArray = java.lang.reflect.Array.newInstance(
-                elementType,newSize);
-        int preserveLength = Math.min(oldSize,newSize);
+                elementType, newSize);
+        int preserveLength = Math.min(oldSize, newSize);
         if (preserveLength > 0)
-            System.arraycopy (oldArray,0,newArray,0,preserveLength);
+            System.arraycopy(oldArray, 0, newArray, 0, preserveLength);
         return newArray;
     }
 

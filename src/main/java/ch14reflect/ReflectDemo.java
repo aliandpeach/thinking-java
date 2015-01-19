@@ -14,7 +14,6 @@ import static net.mindview.util.Print.printnb;
 public class ReflectDemo {
 
     /**
-     *
      * @param t
      * @param <T>
      */
@@ -33,7 +32,7 @@ public class ReflectDemo {
     }
 
 
-    public <T> void showFields(T t) throws Exception{
+    public <T> void showFields(T t) throws Exception {
         Class<?> c = t.getClass();
         Field[] fields = c.getDeclaredFields();
         System.out.println(fields.length);

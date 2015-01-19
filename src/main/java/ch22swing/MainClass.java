@@ -22,6 +22,7 @@ package ch22swing;
  * @version 1.0
  * @since 13-6-22
  */
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 
@@ -36,7 +37,7 @@ public class MainClass {
         JFrame frame = new JFrame("Alignment Example");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        String labels[] = { "--", "----", "--------", "------------" };
+        String labels[] = {"--", "----", "--------", "------------"};
 
         JPanel container = new JPanel();
         BoxLayout layout = new BoxLayout(container, BoxLayout.Y_AXIS);

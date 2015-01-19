@@ -14,6 +14,7 @@ import java.util.List;
 public class TableCreator {
     /**
      * 实现复杂的注解处理器，根据domain类的注解自动生成建表SQL语句
+     *
      * @throws ClassNotFoundException
      */
     public static void processAnnotation() throws ClassNotFoundException {

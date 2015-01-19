@@ -16,6 +16,7 @@ public class BufferedReaderDemo {
 
     /**
      * 利用BufferedReader读取文件内容
+     *
      * @param fileName
      * @return
      * @throws IOException
@@ -24,7 +25,7 @@ public class BufferedReaderDemo {
         BufferedReader in = new BufferedReader(new FileReader(fileName));
         String s;
         StringBuilder sb = new StringBuilder();
-        while ((s=in.readLine()) != null) {
+        while ((s = in.readLine()) != null) {
             sb.append(s).append("\n");
         }
         in.close();
@@ -37,7 +38,7 @@ public class BufferedReaderDemo {
     public void stringReader(String fileName) throws IOException {
         StringReader sr = new StringReader(read(fileName));
         int c;
-        while ((c=sr.read()) != -1) {
+        while ((c = sr.read()) != -1) {
             System.out.println((char) c);
         }
     }

@@ -30,7 +30,7 @@ class SerializeMe implements Serializable {
     private int data;
     private int data3;
 
-    public SerializeMe (int data) {
+    public SerializeMe(int data) {
         this.data = data;
     }
 

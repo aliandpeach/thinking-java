@@ -32,6 +32,7 @@ import java.lang.annotation.Target;
 public @interface Display {
     // 显示名
     public String name();
+
     // 阀值
     public double threshold() default -1;
 }

@@ -61,6 +61,7 @@ public class Rank {
         } while (!flag && n >= 0);
         return flag;
     }
+
     private static <T> void rankWhole(T[] objs) {
         int[] indexs = new int[objs.length];
         for (int i = 0; i < indexs.length; i++) {

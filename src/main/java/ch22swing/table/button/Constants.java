@@ -23,7 +23,9 @@ package ch22swing.table.button;
  * @since 13-6-21
  */
 public interface Constants {
-    /**工程类型**/
+    /**
+     * 工程类型*
+     */
     public static final String PRO_TYPE_GRAILS = "grails";
     public static final String PRO_TYPE_MAVEN = "maven";
 

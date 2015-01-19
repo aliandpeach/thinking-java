@@ -48,6 +48,7 @@ class CyclicBarrierDemo {
 
     /**
      * 测试CompletionService线程池
+     *
      * @param runtimes
      */
     private static void testFutureThreadPool(int runtimes) {

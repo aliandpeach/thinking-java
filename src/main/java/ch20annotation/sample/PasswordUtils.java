@@ -17,7 +17,7 @@ public class PasswordUtils {
     }
 
     @UseCase(id = 49, description = "New passwords can't equal previously used ones")
-    public boolean checkForNewPassword(List<String> prevPasswords,String password) {
+    public boolean checkForNewPassword(List<String> prevPasswords, String password) {
         return !prevPasswords.contains(password);
     }
 } // /:~

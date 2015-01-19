@@ -23,21 +23,37 @@ package ch22swing.table.button;
  * @since 13-6-19
  */
 public class DeployConfig {
-    /** 配置描述*/
+    /**
+     * 配置描述
+     */
     private String desc;
-    /** 本地配置文件根目录*/
+    /**
+     * 本地配置文件根目录
+     */
     private String localConfigPath;
-    /** 本地工程根目录*/
+    /**
+     * 本地工程根目录
+     */
     private String localProjectPath;
-    /** 服务器IP地址*/
+    /**
+     * 服务器IP地址
+     */
     private String serverIp;
-    /** 服务器用户名*/
+    /**
+     * 服务器用户名
+     */
     private String username;
-    /** 服务器密码*/
-    private String  password;
-    /** 服务器配置文件根目录*/
+    /**
+     * 服务器密码
+     */
+    private String password;
+    /**
+     * 服务器配置文件根目录
+     */
     private String remoteConfigPath;
-    /** 发布的工程类型（grails，maven）*/
+    /**
+     * 发布的工程类型（grails，maven）
+     */
     private String projectType;
 
     public DeployConfig(String desc, String localConfigPath, String localProjectPath, String serverIp,

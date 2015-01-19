@@ -3,11 +3,13 @@
 package ch19enums;
 
 import java.util.EnumSet;
+
 import static ch19enums.AlarmPoints.*;
 import static net.mindview.util.Print.print;
 
 public class EnumSets {
-    /**&
+    /**
+     * &
      * EnumSet基本操作
      */
     public void enumSet() {

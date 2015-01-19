@@ -1,8 +1,10 @@
 package ch13string;//: strings/TheReplacements.java
 
 import net.mindview.util.TextFile;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import static net.mindview.util.Print.print;
 
 /*! Here's a block of text to use as input to

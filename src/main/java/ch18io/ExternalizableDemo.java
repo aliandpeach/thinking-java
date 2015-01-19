@@ -2,6 +2,7 @@ package ch18io;//: io/ExternalizableDemo.java
 // Reconstructing an externalizable object.
 
 import java.io.*;
+
 import static net.mindview.util.Print.*;
 
 /**
@@ -44,6 +45,7 @@ public class ExternalizableDemo implements Externalizable {
 
     /**
      * 利用Externalizable接口手动控制序列化
+     *
      * @throws IOException
      * @throws ClassNotFoundException
      */
