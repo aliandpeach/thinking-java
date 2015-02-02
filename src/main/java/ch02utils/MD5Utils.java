@@ -15,6 +15,9 @@
  */
 package ch02utils;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 /**
  * Description of this file.
  *
@@ -23,29 +26,80 @@ package ch02utils;
  * @since 13-5-21
  */
 public class MD5Utils {
-    public static String getMD5(byte[] source) {
-        String s = null;
-        char hexDigits[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
-        try {
-            java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
-            md.update(source);
-            byte tmp[] = md.digest();          // MD5 的计算结果是一个 128 位的长整数，
-            // 用字节表示就是 16 个字节
-            char str[] = new char[16 * 2];   // 每个字节用 16 进制表示的话，使用两个字符，
-            // 所以表示成 16 进制需要 32 个字符
-            int k = 0;                                // 表示转换结果中对应的字符位置
-            for (int i = 0; i < 16; i++) {          // 从第一个字节开始，对 MD5 的每一个字节
-                // 转换成 16 进制字符的转换
-                byte byte0 = tmp[i];                 // 取第 i 个字节
-                str[k++] = hexDigits[byte0 >>> 4 & 0xf];  // 取字节中高 4 位的数字转换,
-                // >>> 为逻辑右移，将符号位一起右移
-                str[k++] = hexDigits[byte0 & 0xf];            // 取字节中低 4 位的数字转换
-            }
-            s = new String(str);                                 // 换后的结果转换为字符串
+    /**
+     *@Description: 将字符串转化为MD5
+     */
 
-        } catch (Exception e) {
+
+    /**
+     * @param str
+     * @return
+     * @Date: 2013-9-6
+     * @Author: lulei
+     * @Description: 32位小写MD5
+     */
+    public static String parseStrToMd5L32(String str) {
+        String reStr = null;
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            byte[] bytes = md5.digest(str.getBytes());
+            StringBuilder stringBuffer = new StringBuilder();
+            for (byte b : bytes) {
+                int bt = b & 0xff;
+                if (bt < 16) {
+                    stringBuffer.append(0);
+                }
+                stringBuffer.append(Integer.toHexString(bt));
+            }
+            reStr = stringBuffer.toString();
+        } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-        return s;
+        return reStr;
+    }
+
+    /**
+     * @param str
+     * @return
+     * @Date: 2013-9-6
+     * @Author: lulei
+     * @Description: 32位大写MD5
+     */
+    public static String parseStrToMd5U32(String str) {
+        String reStr = parseStrToMd5L32(str);
+        if (reStr != null) {
+            reStr = reStr.toUpperCase();
+        }
+        return reStr;
+    }
+
+    /**
+     * @param str
+     * @return
+     * @Date: 2013-9-6
+     * @Author: lulei
+     * @Description: 16位小写MD5
+     */
+    public static String parseStrToMd5U16(String str) {
+        String reStr = parseStrToMd5L32(str);
+        if (reStr != null) {
+            reStr = reStr.toUpperCase().substring(8, 24);
+        }
+        return reStr;
+    }
+
+    /**
+     * @param str
+     * @return
+     * @Date: 2013-9-6
+     * @Author: lulei
+     * @Description: 16位大写MD5
+     */
+    public static String parseStrToMd5L16(String str) {
+        String reStr = parseStrToMd5L32(str);
+        if (reStr != null) {
+            reStr = reStr.substring(8, 24);
+        }
+        return reStr;
     }
 }
