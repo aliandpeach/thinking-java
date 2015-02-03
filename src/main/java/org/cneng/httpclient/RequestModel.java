@@ -16,15 +16,14 @@ public class RequestModel {
     private String mac = "080027004CE8";
     // 软件id
     private String swId = "103479";
-    // UserID
-    private String userId = "100";
-    // UserKey
-    private String userKey = "606982_WINHONG_B2-6E-69-B1-49-F0-81-91-6C-11-C0-6C-DB-FF-4A-" +
-            "F4_B1-8A-80-58-3B-1C-04-2B-05-37-7A-B5-AE-1F-6D-3E-39-C5-F8-34";
     // 软件key
     private String swKey = "97dc993a6b614e03a35213c58b8c8f0e";
+    // UUVersion
+    private String uuVersion = "1.0.0.1";
     // 软件key大写
     private String swKeyUpper = "97DC993A6B614E03A35213C58B8C8F0E";
+    // 服务器列表刷新地址
+    private String flushServer = "http://common.taskok.com:9000/Service/ServerConfig.aspx";
     // 登录服务器地址
     private String loginServer = "login.uudama.com:9000";
     // 上传服务器地址
@@ -33,10 +32,19 @@ public class RequestModel {
     private String resultServer = "upload.uuwise.com:9000";
     // 备份服务器地址
     private String backupServer = "upload.uuwise.com:9000";
-    // 验证码图片路径
-    private String picPath = "";
-    // 验证码ID
-    private String checkId = "223498048";
+    // UserID
+    private String userId = "100";
+    // UserKey
+    private String userKey = "606982_WINHONG_B2-6E-69-B1-49-F0-81-91-6C-11-C0-6C-DB-FF-4A-" +
+            "F4_B1-8A-80-58-3B-1C-04-2B-05-37-7A-B5-AE-1F-6D-3E-39-C5-F8-34";
+    // 超时时间(毫秒)
+    private String timeout = "60000";
+    // 间隔刷新时间(毫秒)
+    private String flushInternals = "1000";
+    // 版本
+    private String version = "100";
+    // 验证码的CodeType
+    private String type = "1104";
 
     /**
      * 获取 uname.
@@ -183,24 +191,6 @@ public class RequestModel {
     }
 
     /**
-     * 获取 picPath.
-     *
-     * @return picPath.
-     */
-    public String getPicPath() {
-        return picPath;
-    }
-
-    /**
-     * 设置 picPath.
-     *
-     * @param picPath picPath.
-     */
-    public void setPicPath(String picPath) {
-        this.picPath = picPath;
-    }
-
-    /**
      * 设置 backupServer.
      *
      * @param backupServer backupServer.
@@ -273,20 +263,110 @@ public class RequestModel {
     }
 
     /**
-     * 获取 checkId.
+     * 设置 uuVersion.
      *
-     * @return checkId.
+     * @param uuVersion uuVersion.
      */
-    public String getCheckId() {
-        return checkId;
+    public void setUuVersion(String uuVersion) {
+        this.uuVersion = uuVersion;
     }
 
     /**
-     * 设置 checkId.
+     * 获取 uuVersion.
      *
-     * @param checkId checkId.
+     * @return uuVersion.
      */
-    public void setCheckId(String checkId) {
-        this.checkId = checkId;
+    public String getUuVersion() {
+        return uuVersion;
+    }
+
+    /**
+     * 获取 flushServer.
+     *
+     * @return flushServer.
+     */
+    public String getFlushServer() {
+        return flushServer;
+    }
+
+    /**
+     * 设置 flushServer.
+     *
+     * @param flushServer flushServer.
+     */
+    public void setFlushServer(String flushServer) {
+        this.flushServer = flushServer;
+    }
+
+    /**
+     * 设置 type.
+     *
+     * @param type type.
+     */
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    /**
+     * 获取 version.
+     *
+     * @return version.
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
+     * 获取 type.
+     *
+     * @return type.
+     */
+    public String getType() {
+        return type;
+    }
+
+    /**
+     * 设置 version.
+     *
+     * @param version version.
+     */
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    /**
+     * 获取 timeout.
+     *
+     * @return timeout.
+     */
+    public String getTimeout() {
+        return timeout;
+    }
+
+    /**
+     * 设置 flushInternals.
+     *
+     * @param flushInternals flushInternals.
+     */
+    public void setFlushInternals(String flushInternals) {
+        this.flushInternals = flushInternals;
+    }
+
+    /**
+     * 获取 flushInternals.
+     *
+     * @return flushInternals.
+     */
+    public String getFlushInternals() {
+        return flushInternals;
+    }
+
+    /**
+     * 设置 timeout.
+     *
+     * @param timeout timeout.
+     */
+    public void setTimeout(String timeout) {
+        this.timeout = timeout;
     }
 }

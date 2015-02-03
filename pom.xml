@@ -141,6 +141,11 @@
             <artifactId>httpmime</artifactId>
             <version>4.3.6</version>
         </dependency>
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+            <version>1.10</version>
+        </dependency>
         <!-- Spring3.2.13依赖-->
         <dependency>
             <groupId>org.springframework</groupId>

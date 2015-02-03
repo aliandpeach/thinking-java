@@ -15,15 +15,23 @@
  */
 package org.cneng.httpclient;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.PropertiesConfiguration;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
 
@@ -135,19 +143,20 @@ public class Utils {
             return null;
         } finally {
             try {
+                assert digestInputStream != null;
                 digestInputStream.close();
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
             try {
                 fileInputStream.close();
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
         }
     }
 
-    public static String Md5(String s) throws IOException {
+    public static String Md5(String s){
         try {
             byte[] btInput = s.getBytes();
             MessageDigest mdInst = MessageDigest.getInstance("MD5");
@@ -189,8 +198,49 @@ public class Utils {
         return list.toArray(new String[list.size()]);
     }
 
-    public static void main(String[] args) {
-        System.out.println(Arrays.asList(parseServers("1000,service.taskok.com:9000:101,upload.taskok.com:9000:102,code.taskok.com:9000:103,bak.taskok.com:104")));
+    public static String downloadPic(String outdir, String urlstr) throws Exception {
+        //返回的是4位验证码的图片
+        URL url = new URL(urlstr);
+        File outFile = new File("D:\\work\\a.png");
+        OutputStream os = new FileOutputStream(outFile);
+        BufferedReader bf = new BufferedReader(new InputStreamReader(url.openStream()));
+
+        InputStream is = url.openStream();
+        byte[] buff = new byte[1024];
+        while (true) {    //要注意这种写法
+            int readed = is.read(buff);
+            if (readed == -1) {
+                break;
+            }
+            byte[] temp = new byte[readed];
+            System.arraycopy(buff, 0, temp, 0, readed);   // 这句是关键
+            os.write(temp);
+        }
+        is.close();
+        os.close();
+        return null;
+    }
+
+    /**
+     * 生成一个16位的随机字符串
+     *
+     * @return
+     */
+    public static String randomUUID() {
+        UUID uuid = UUID.randomUUID();
+        byte[] bytes = new byte[16];
+        // Convert UUID into byte array
+        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+        byteBuffer.order(ByteOrder.BIG_ENDIAN);
+        byteBuffer.putLong(uuid.getMostSignificantBits());
+        byteBuffer.putLong(uuid.getLeastSignificantBits());
+        byteBuffer.flip();
+        // Convert byte array to base64 string
+        return Base64.encodeBase64URLSafeString(bytes);
+    }
+
+    public static void main(String[] args) throws Exception {
+        downloadPic("D:/work/", "http://gsxt.gdgs.gov.cn/verify.html");
     }
 
 }

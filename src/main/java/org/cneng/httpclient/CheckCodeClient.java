@@ -1,7 +1,23 @@
 package org.cneng.httpclient;
 
 /**
- * Description of this file.
+ *
+ request.Headers.Add("SID",软件id);
+ request.Headers.Add("HASH",md5(软件id+软件key.ToUpper()));   //32位MD5加密小写
+ request.Headers.Add("UUVersion","1.0.0.1");
+ ----没有登录之前，UserID就用100。登录成功后，服务器会返回UserID，之后的请求就用服务器返回的UserID
+ request.Headers.Add("UID",UserID);
+ ----没有登录之前，UserID就用100。登录成功后，服务器会返回UserID，之后的请求就用服务器返回的UserID
+ request.Headers.Add("User-Agent", MD5(软件key.ToUpper() + UserID));
+ ----用户登录时候的特殊header：
+ ----除了以上header之外，增加如下：
+ ----MAC把特殊符号去掉，纯粹字母数字
+ request.Headers.Add("KEY",MD5(软件key.ToUpper()+UserName.ToUpper())+MAC);
+ ----MAC把特殊符号去掉，纯粹字母数字
+ request.Headers.Add("UUKEY", MD5(UserName.ToUpper() + MAC + 软件key.ToUpper()));
+ ----查分时候的特殊header:
+ request.Headers.Add("UUAgent", MD5(UserKEY.ToUpper() + UserID + 软件KEY));
+ request.Headers.Add("KEY", UserKey);
  *
  * @author XiongNeng
  * @version 1.0
@@ -10,7 +26,6 @@ package org.cneng.httpclient;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -25,73 +40,94 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+
 import static org.cneng.httpclient.Utils.*;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-//import org.apache.http.entity.mime.MultipartEntityBuilder;
-//import org.apache.http.entity.mime.content.FileBody;
-//import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import static org.cneng.httpclient.ConfigUtil.get;
 
 public class CheckCodeClient {
+    private static final CheckCodeClient instance = new CheckCodeClient();
+    private RequestModel model;
 
-    public static String[] getServers() throws Exception {
-        // 用户名
-        String uname = "winhong";
-        // 用户密码
-        String pwmd5 = "vs_WinHong2014";
-        // MAC地址
-        String mac = "080027004CE8";
-        // 软件id
-        String swId = "103479";
-        // UserID
-        String userId = "100";
-        // 软件key
-        String swKey = "97dc993a6b614e03a35213c58b8c8f0e";
-        String swKeyUpper = "97DC993A6B614E03A35213C58B8C8F0E";
-        // UserKey
-        String userKey = "";
+    private CheckCodeClient() {
+        try {
+            // 初始化配置文件和RequestModel
+            ConfigUtil.getInstance();
+            model = new RequestModel();
+            model.setSwId(get("swId"));
+            model.setSwKey(get("swKey"));
+            model.setSwKeyUpper(get("swKeyUpper"));
+            model.setMac(get("mac"));
+            model.setUuVersion(get("uuVersion"));
+            model.setUname(get("uname"));
+            model.setPwmd5(Md5(get("pwmd5")));
+            model.setFlushServer(get("flushServers"));
+            //---------------------------------------------
+            model.setFlushInternals(get("flushInternals"));
+            model.setLoginServer(get("loginServer"));
+            model.setUploadServer(get("uploadServer"));
+            model.setResultServer(get("resultServer"));
+            model.setBackupServer(get("backupServer"));
+            //---------------------------------------------
+            model.setUserId(get("userId"));
+            model.setUserKey(get("userKey"));
+            model.setTimeout(get("timeout"));
+            model.setVersion(get("version"));
+            model.setType(get("type"));
 
+            // 第一步：刷新服务器列表
+            String[] servers = getServers();
+            model.setFlushInternals(servers[0]);
+            model.setLoginServer(servers[1]);
+            model.setUploadServer(servers[2]);
+            model.setResultServer(servers[3]);
+            if (servers.length > 4) {
+                model.setBackupServer(servers[4]);
+            }
+
+            // 第二步：登录
+            String[] userkeys = login();
+            model.setUserId(userkeys[0]);
+            model.setUserKey(userkeys[1]);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static CheckCodeClient getInstance() {
+        return instance;
+    }
+
+    /**
+     * 验证码识别整个流程
+     * @param checkcodeFile 图片地址
+     * @return 验证码
+     */
+    public static String checkCode(String checkcodeFile) {
+        try {
+            String uploadResult = instance.upload(checkcodeFile);
+            if (uploadResult.contains("|")) {
+                return uploadResult.split("|")[1];
+            } else {
+                return instance.getResult(uploadResult);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private String[] getServers() throws Exception {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
-            HttpGet httpget = new HttpGet("http://common.taskok.com:9000/Service/ServerConfig.aspx");
+            HttpGet httpget = new HttpGet(model.getFlushServer());
             System.out.println("Executing request " + httpget.getRequestLine());
             // 所有请求的通用header：
-            httpget.addHeader("SID", swId);
-            httpget.addHeader("HASH", Md5(swId + swKeyUpper));
-            httpget.addHeader("UUVersion", "1.0.0.1");
-            httpget.addHeader("UID", userId);
-            httpget.addHeader("User-Agent", Md5(swKeyUpper + userId));
-
-            // ----用户登录时候的特殊header：
-//            httpget.addHeader("KEY", parseStrToMd5L32(swKeyUpper + uname.toUpperCase()) + mac);
-//            httpget.addHeader("UUKEY", parseStrToMd5L32(uname.toUpperCase() + mac + swKeyUpper));
-
-            // ----查分时候的特殊header：
-//            httpget.addHeader("UUAgent", parseStrToMd5L32(userKey.toUpperCase() + userId + swKey));
-//            httpget.addHeader("KEY", userKey);
-
-
-            // request.Headers.Add("SID",软件id);
-            // request.Headers.Add("HASH",md5(软件id+软件key.ToUpper()));   //32位MD5加密小写
-            // request.Headers.Add("UUVersion","1.0.0.1");
-            // ----没有登录之前，UserID就用100。登录成功后，服务器会返回UserID，之后的请求就用服务器返回的UserID
-            // request.Headers.Add("UID",UserID);
-            // ----没有登录之前，UserID就用100。登录成功后，服务器会返回UserID，之后的请求就用服务器返回的UserID
-            // request.Headers.Add("User-Agent", MD5(软件key.ToUpper() + UserID));
-            // ----用户登录时候的特殊header：
-            // ----除了以上header之外，增加如下：
-            // ----MAC把特殊符号去掉，纯粹字母数字
-            // request.Headers.Add("KEY",MD5(软件key.ToUpper()+UserName.ToUpper())+MAC);
-            // ----MAC把特殊符号去掉，纯粹字母数字
-            // request.Headers.Add("UUKEY", MD5(UserName.ToUpper() + MAC + 软件key.ToUpper()));
-            // ----查分时候的特殊header:
-            // request.Headers.Add("UUAgent", MD5(UserKEY.ToUpper() + UserID + 软件KEY));
-            // request.Headers.Add("KEY", UserKey);
+            httpget.addHeader("SID", model.getSwId());
+            httpget.addHeader("HASH", Md5(model.getSwId() + model.getSwKeyUpper()));
+            httpget.addHeader("UUVersion", model.getUuVersion());
+            httpget.addHeader("UID", model.getUserId());
+            httpget.addHeader("User-Agent", Md5(model.getSwKeyUpper() + model.getUserId()));
 
             // Create a custom response handler
             ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
@@ -117,37 +153,24 @@ public class CheckCodeClient {
         }
     }
 
-    public static String login() throws Exception {
-        // 用户名
-        String uname = "winhong";
-        // 用户密码
-        String pwmd5 = "vs_WinHong2014";
-        // MAC地址
-        String mac = "080027004CE8";
-        // 软件id
-        String swId = "103479";
-        // UserID
-        String userId = "100";
-        // 软件key
-        String swKey = "97dc993a6b614e03a35213c58b8c8f0e";
-        String swKeyUpper = "97DC993A6B614E03A35213C58B8C8F0E";
-
-        // 登录服务器地址
-        String loginServer = "login.uudama.com:9000";
+    private String[] login() throws Exception {
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpGet httpget = new HttpGet(
-                    "http://" + loginServer + "/Upload/UULogin.aspx?U=" + uname + "&p=" + Md5(pwmd5));
+                    "http://" + model.getLoginServer() + "/Upload/UULogin.aspx?U="
+                            + model.getUname() + "&p=" + model.getPwmd5());
             System.out.println("Executing request " + httpget.getRequestLine());
+
             // 所有请求的通用header：
-            httpget.addHeader("SID", swId);
-            httpget.addHeader("HASH", Md5(swId + swKeyUpper));
-            httpget.addHeader("UUVersion", "1.0.0.1");
-            httpget.addHeader("UID", userId);
-            httpget.addHeader("User-Agent", Md5(swKeyUpper + userId));
-            httpget.addHeader("KEY", Md5(swKeyUpper + uname.toUpperCase()) + mac);
-            httpget.addHeader("UUKEY", Md5(uname.toUpperCase() + mac + swKeyUpper));
+            httpget.addHeader("SID", model.getSwId());
+            httpget.addHeader("HASH", Md5(model.getSwId() + model.getSwKeyUpper()));
+            httpget.addHeader("UUVersion", model.getUuVersion());
+            httpget.addHeader("UID", model.getUserId());
+            httpget.addHeader("User-Agent", Md5(model.getSwKeyUpper() + model.getUserId()));
+
+            httpget.addHeader("KEY", Md5(model.getSwKeyUpper() + model.getUname().toUpperCase()) + model.getMac());
+            httpget.addHeader("UUKEY", Md5(model.getUname().toUpperCase() + model.getMac() + model.getSwKeyUpper()));
 
             // Create a custom response handler
             ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
@@ -166,7 +189,7 @@ public class CheckCodeClient {
             String responseBody = httpclient.execute(httpget, responseHandler);
             System.out.println("----------------------------------------");
             System.out.println(responseBody);
-            return responseBody.split("_")[0];
+            return new String[]{responseBody.split("_")[0], responseBody};
         } finally {
             httpclient.close();
         }
@@ -174,49 +197,32 @@ public class CheckCodeClient {
 
     /**
      * 上传文件
+     *
      * @return
      * @throws Exception
      */
-    public static String upload() throws Exception {
-        // 用户名
-        String uname = "winhong";
-        // 用户密码
-        String pwmd5 = "vs_WinHong2014";
-        // MAC地址
-        String mac = "080027004CE8";
-        // 软件id
-        String swId = "103479";
-        // 软件key
-        String swKey = "97dc993a6b614e03a35213c58b8c8f0e";
-        String swKeyUpper = "97DC993A6B614E03A35213C58B8C8F0E";
-
-        // 登录服务器地址
-        String uploadServer = "upload.uuwise.com:9000";
-        // UserId
-        String userId = "606982";
-        // UserKey
-        String userKey = "606982_WINHONG_B2-6E-69-B1-49-F0-81-91-6C-11-C0-6C-DB-FF-4A-" +
-                "F4_B1-8A-80-58-3B-1C-04-2B-05-37-7A-B5-AE-1F-6D-3E-39-C5-F8-34";
-        String filename = "D:\\work\\verify.png";
+    private String upload(String filename) throws Exception {
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
-            HttpPost httppost = new HttpPost("http://" + uploadServer + "/Upload/Processing.aspx");
+            HttpPost httppost = new HttpPost("http://" + model.getUploadServer() + "/Upload/Processing.aspx");
             System.out.println("Executing request " + httppost.getRequestLine());
+
             // 所有请求的通用header：
-            httppost.addHeader("SID", swId);
-            httppost.addHeader("HASH", Md5(swId + swKeyUpper));
-            httppost.addHeader("UUVersion", "1.0.0.1");
-            httppost.addHeader("UID", userId);
-            httppost.addHeader("User-Agent", Md5(swKeyUpper + userId));
+            httppost.addHeader("SID", model.getSwId());
+            httppost.addHeader("HASH", Md5(model.getSwId() + model.getSwKeyUpper()));
+            httppost.addHeader("UUVersion", model.getUuVersion());
+            httppost.addHeader("UID", model.getUserId());
+            httppost.addHeader("User-Agent", Md5(model.getSwKeyUpper() + model.getUserId()));
 
             FileBody IMG = new FileBody(new File(filename));
-            StringBody KEY = new StringBody(userKey.toUpperCase(), ContentType.TEXT_PLAIN);
-            StringBody SID = new StringBody(swId, ContentType.TEXT_PLAIN);
-            StringBody SKEY = new StringBody(Md5(userKey.toLowerCase()+swId+swKey), ContentType.TEXT_PLAIN);
-            StringBody Version = new StringBody("100", ContentType.TEXT_PLAIN);
-            StringBody TimeOut = new StringBody("60000", ContentType.TEXT_PLAIN);
-            StringBody Type = new StringBody("1104", ContentType.TEXT_PLAIN);
+            StringBody KEY = new StringBody(model.getUserKey().toUpperCase(), ContentType.TEXT_PLAIN);
+            StringBody SID = new StringBody(model.getSwId(), ContentType.TEXT_PLAIN);
+            StringBody SKEY = new StringBody(Md5(model.getUserKey().toLowerCase() +
+                    model.getSwId() + model.getSwKey()), ContentType.TEXT_PLAIN);
+            StringBody Version = new StringBody(model.getVersion(), ContentType.TEXT_PLAIN);
+            StringBody TimeOut = new StringBody(model.getTimeout(), ContentType.TEXT_PLAIN);
+            StringBody Type = new StringBody(model.getType(), ContentType.TEXT_PLAIN);
             StringBody GUID = new StringBody(GetFileMD5(filename), ContentType.TEXT_PLAIN);
 
             HttpEntity reqEntity = MultipartEntityBuilder.create()
@@ -255,47 +261,27 @@ public class CheckCodeClient {
 
     /**
      * 轮询结果
+     *
      * @return
      * @throws Exception
      */
-    public static String getResult() throws Exception {
-        // 用户名
-        String uname = "winhong";
-        // 用户密码
-        String pwmd5 = "vs_WinHong2014";
-        // MAC地址
-        String mac = "080027004CE8";
-        // 软件id
-        String swId = "103479";
-        // UserID
-        String userId = "100";
-        // 软件key
-        String swKey = "97dc993a6b614e03a35213c58b8c8f0e";
-        String swKeyUpper = "97DC993A6B614E03A35213C58B8C8F0E";
-
-        // 登录服务器地址
-        String resultServer = "upload.uuwise.com:9000";
-        // UserKey
-        String userKey = "606982_WINHONG_B2-6E-69-B1-49-F0-81-91-6C-11-C0-6C-DB-FF-4A-" +
-                "F4_B1-8A-80-58-3B-1C-04-2B-05-37-7A-B5-AE-1F-6D-3E-39-C5-F8-34";
-        // 验证码ID
-        String checkId = "223498048";
+    private String getResult(String checkId) throws Exception {
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
-            HttpGet httpget = new HttpGet(
-                    "http://" + resultServer + "/Upload/GetResult.aspx?key=" + userKey + "&ID=" + checkId);
+            HttpGet httpget = new HttpGet("http://" + model.getResultServer() +
+                    "/Upload/GetResult.aspx?key=" + model.getUserKey() + "&ID=" + checkId);
             System.out.println("Executing request " + httpget.getRequestLine());
+
             // 所有请求的通用header：
-            httpget.addHeader("SID", swId);
-            httpget.addHeader("HASH", Md5(swId + swKeyUpper));
-            httpget.addHeader("UUVersion", "1.0.0.1");
-            httpget.addHeader("UID", userId);
-            httpget.addHeader("User-Agent", Md5(swKeyUpper + userId));
+            httpget.addHeader("SID", model.getSwId());
+            httpget.addHeader("HASH", Md5(model.getSwId() + model.getSwKeyUpper()));
+            httpget.addHeader("UUVersion", model.getUuVersion());
+            httpget.addHeader("UID", model.getUserId());
+            httpget.addHeader("User-Agent", Md5(model.getSwKeyUpper() + model.getUserId()));
 
             // Create a custom response handler
             ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
-
                 public String handleResponse(
                         final HttpResponse response) throws ClientProtocolException, IOException {
                     int status = response.getStatusLine().getStatusCode();
@@ -308,6 +294,15 @@ public class CheckCodeClient {
                 }
             };
             String responseBody = httpclient.execute(httpget, responseHandler);
+            while ("-3".equals(responseBody)) {
+                try {
+                    System.out.println("----getResult sleep----");
+                    Thread.sleep(Long.parseLong(model.getFlushInternals()));
+                    responseBody = httpclient.execute(httpget, responseHandler);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
             System.out.println("----------------------------------------");
             System.out.println(responseBody);
             return responseBody;
@@ -317,12 +312,7 @@ public class CheckCodeClient {
     }
 
 
-
     public static void main(String[] args) throws Exception {
-//        String[] servers = getServers();
-//        String userId = login();
-//        String checkId = upload();  // 223498048
-        getResult();
-
+        checkCode("D:/work/verify.png");
     }
 }
