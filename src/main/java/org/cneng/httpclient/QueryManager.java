@@ -2,32 +2,29 @@ package org.cneng.httpclient;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.cookie.Cookie;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.Args;
-import org.apache.http.util.ByteArrayBuffer;
 import org.apache.http.util.EntityUtils;
 
 import static org.cneng.httpclient.Utils.*;
@@ -41,6 +38,10 @@ import static org.cneng.httpclient.ConfigUtil.get;
  * @since 2015/2/3
  */
 public class QueryManager {
+    /**
+     * 首页地址
+     */
+    private String homepageUrl = "http://gsxt.gdgs.gov.cn/";
     /**
      * 验证码图片生成地址
      */
@@ -62,6 +63,7 @@ public class QueryManager {
 
     public QueryManager() {
         ConfigUtil.getInstance();
+        homepageUrl = get("homepageUrl");
         verifyPicUrl = get("verifyPicUrl");
         checkCodeUrl = get("checkCodeUrl");
         showInfoUrl = get("showInfoUrl");
@@ -70,6 +72,7 @@ public class QueryManager {
 
     /**
      * 工商局网站上面通过关键字搜索企业信息
+     *
      * @param keyword 关键字：注册号或者是企业名称
      * @return 企业地址
      */
@@ -77,18 +80,25 @@ public class QueryManager {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             System.out.println(sdf.format(new Date()));
-            // 第一步：先下载验证码图片到本地
-            String[] downloads = downloadVerifyPic();
-            // 第二步：获取验证码
+            // 第一步：访问首页获取sessionid
+            String jsessionid = fetchSessionId();
+            // 第二步：先下载验证码图片到本地
+            String[] downloads = downloadVerifyPic(jsessionid);
+            // 第三步：获取验证码
             String checkcode = CheckCodeClient.checkCode(downloads[0]);
-            // JSESSIONID
-            String jsessionid = downloads[1];
-            // 第三步：调用服务器的验证码认证接口
+            // 第四步：调用服务器的验证码认证接口
             CheckCodeResult checkCodeResult = authenticate(keyword, checkcode, jsessionid);
+            // 第五步：调用查询接口查询结果列表
             if ("1".equals(checkCodeResult.getFlag())) {
-                String lastResult = showInfo(checkCodeResult.getTextfield(), checkcode, jsessionid);
+                String searchPage = showInfo(checkCodeResult.getTextfield(), checkcode, jsessionid);
+                // 第六步：解析出第一条链接地址
+                String link = JSoupUtil.parseLink(searchPage);
+                // 第七步：点击详情链接，获取详情HTML页面
+                String detailHtml = showDetail(link, jsessionid);
+                // 第八步：解析详情HTML页面，获取最后的地址
+                return JSoupUtil.parseLocation(detailHtml);
             } else {
-                System.out.println("-----------------error------------------");
+                System.out.println("-----------------error------------------" );
             }
             System.out.println(sdf.format(new Date()));
             // ---------------------------------------------------------------------------------
@@ -98,12 +108,14 @@ public class QueryManager {
         return null;
     }
 
+
     /**
-     * 下载验证码图片
-     * @return [下载图片地址, Cookie中的JSESSIONID]
+     * 先访问首页获取SessionID
+     *
+     * @return http://gsxt.gdgs.gov.cn/
      * @throws Exception
      */
-    private String[] downloadVerifyPic() throws Exception {
+    private String fetchSessionId() throws Exception {
         RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.BEST_MATCH).build();
         CookieStore cookieStore = new BasicCookieStore();
         HttpClientContext context = HttpClientContext.create();
@@ -112,10 +124,57 @@ public class QueryManager {
         CloseableHttpClient httpclient = HttpClients.custom().
                 setDefaultRequestConfig(globalConfig).setDefaultCookieStore(cookieStore).build();
         try {
+            HttpGet httpget = new HttpGet(homepageUrl);
+            System.out.println("Executing request " + httpget.getRequestLine());
+            // 所有请求的通用header：
+            httpget.addHeader("User-Agent",
+                    "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:33.0) Gecko/20100101 Firefox/33.0");
+            httpget.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+            httpget.addHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3");
+            httpget.addHeader("Accept-Encoding", "gzip, deflate");
+            httpget.addHeader("Connection", "keep-alive");
+
+            // Create a custom response handler
+            ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
+                public String handleResponse(
+                        final HttpResponse response) throws ClientProtocolException, IOException {
+                    int status = response.getStatusLine().getStatusCode();
+                    if (status >= 200 && status < 300) {
+                        return null;
+                    } else {
+                        throw new ClientProtocolException("Unexpected response status: " + status);
+                    }
+                }
+            };
+            httpclient.execute(httpget, responseHandler);
+            List<Cookie> cookies = context.getCookieStore().getCookies();
+            for (Cookie cookie : cookies) {
+                if ("JSESSIONID".equals(cookie.getName())) {
+                    System.out.println(cookie.getName() + ":" + cookie.getValue());
+                    System.out.println("******************************");
+                    return cookie.getValue();
+                }
+            }
+        } finally {
+            httpclient.close();
+        }
+        return null;
+    }
+
+    /**
+     * 下载验证码图片
+     *
+     * @return [下载图片地址, Cookie中的JSESSIONID]
+     * @throws Exception
+     */
+    private String[] downloadVerifyPic(String jsessionId) throws Exception {
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        try {
             HttpGet httpget = new HttpGet(verifyPicUrl + "?random=" + Math.random());
             System.out.println("Executing request " + httpget.getRequestLine());
             // 所有请求的通用header：
-            httpget.addHeader("Accept", "image/webp,*/*;q=0.8");
+            httpget.addHeader("Accept", "image/png,image/*;q=0.8,*/*;q=0.5");
+            httpget.addHeader("Cookie", "JSESSIONID=" + jsessionId);
 
             // Create a custom response handler
             ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
@@ -131,18 +190,10 @@ public class QueryManager {
                 }
             };
             String doawloadPic = httpclient.execute(httpget, responseHandler);
-            List<Cookie> cookies = context.getCookieStore().getCookies();
-            for (Cookie cookie : cookies) {
-                if ("JSESSIONID".equals(cookie.getName())) {
-                    System.out.println(cookie.getName() + ":" + cookie.getValue());
-                    System.out.println("******************************");
-                    return new String[]{doawloadPic, cookie.getValue()};
-                }
-            }
+            return new String[]{doawloadPic, jsessionId};
         } finally {
             httpclient.close();
         }
-        return null;
     }
 
     private String doDownload(final HttpEntity entity, String outdir) throws IOException {
@@ -172,21 +223,15 @@ public class QueryManager {
 
     /**
      * 验证码服务器验证接口
-     * @param keywork 关键字
-     * @param checkcode 验证码
+     *
+     * @param keywork    关键字
+     * @param checkcode  验证码
      * @param jsessionid jsessionid
      * @return 结果
      * @throws Exception
      */
     private CheckCodeResult authenticate(String keywork, String checkcode, String jsessionid) throws Exception {
-        RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.BEST_MATCH).build();
-        CookieStore cookieStore = new BasicCookieStore();
-//        cookieStore.addCookie(new BasicClientCookie("JSESSIONID", jsessionid));
-        HttpClientContext context = HttpClientContext.create();
-        context.setCookieStore(cookieStore);
-
-        CloseableHttpClient httpclient = HttpClients.custom().
-                setDefaultRequestConfig(globalConfig).setDefaultCookieStore(cookieStore).build();
+        CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpPost httppost = new HttpPost(checkCodeUrl);
             System.out.println("Executing request " + httppost.getRequestLine());
@@ -198,16 +243,12 @@ public class QueryManager {
             httppost.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
             httppost.addHeader("Accept-Encoding", "gzip,deflate");
             httppost.addHeader("Accept-Language", "zh-CN,zh;q=0.8,en;q=0.6");
-//            httppost.addHeader("Connection", "keep-alive");
-//            httppost.addHeader("Cache-Control", "max-age=0");
+            httppost.addHeader("Cookie", "JSESSIONID=" + jsessionid);
 
-            StringBody textfield = new StringBody(keywork, ContentType.TEXT_PLAIN);
-            StringBody code = new StringBody(checkcode, ContentType.TEXT_PLAIN);
-
-            HttpEntity reqEntity = MultipartEntityBuilder.create()
-                    .addPart("textfield", textfield)
-                    .addPart("code", code)
-                    .build();
+            List<NameValuePair> params = new ArrayList<>();
+            params.add(new BasicNameValuePair("textfield", keywork));
+            params.add(new BasicNameValuePair("code", checkcode));
+            UrlEncodedFormEntity reqEntity = new UrlEncodedFormEntity(params, "UTF-8");
             httppost.setEntity(reqEntity);
             // Create a custom response handler
             ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
@@ -216,7 +257,7 @@ public class QueryManager {
                     int status = response.getStatusLine().getStatusCode();
                     if (status >= 200 && status < 300) {
                         HttpEntity entity = response.getEntity();
-                        return entity != null ? EntityUtils.toString(entity) : null;
+                        return entity != null ? EntityUtils.toString(entity, "UTF-8") : null;
                     } else {
                         throw new ClientProtocolException("Unexpected response status: " + status);
                     }
@@ -232,24 +273,18 @@ public class QueryManager {
     }
 
     /**
-     * 查询实际的结果
-     * @param textfield 验证码验证后返回的关键字
-     * @param checkcode 验证码
+     * 查询列表结果
+     *
+     * @param textfield  验证码验证后返回的关键字
+     * @param checkcode  验证码
      * @param jsessionid sessionid
      * @return 查询页面
      * @throws Exception
      */
     private String showInfo(String textfield, String checkcode, String jsessionid) throws Exception {
-        RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.BEST_MATCH).build();
-        CookieStore cookieStore = new BasicCookieStore();
-        cookieStore.addCookie(new BasicClientCookie("JSESSIONID", jsessionid));
-        HttpClientContext context = HttpClientContext.create();
-        context.setCookieStore(cookieStore);
-
-        CloseableHttpClient httpclient = HttpClients.custom().
-                setDefaultRequestConfig(globalConfig).setDefaultCookieStore(cookieStore).build();
+        CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
-            HttpPost httppost = new HttpPost(checkCodeUrl);
+            HttpPost httppost = new HttpPost(showInfoUrl);
             System.out.println("Executing request " + httppost.getRequestLine());
 
             // 所有请求的通用header：
@@ -260,16 +295,15 @@ public class QueryManager {
             httppost.addHeader("Content-Type", "application/x-www-form-urlencoded");
             httppost.addHeader("Accept-Encoding", "gzip,deflate");
             httppost.addHeader("Accept-Language", "zh-CN,zh;q=0.8,en;q=0.6");
-//            httppost.addHeader("Connection", "keep-alive");
+            httppost.addHeader("Cookie", "JSESSIONID=" + jsessionid);
 
-            StringBody textfield1 = new StringBody(textfield, ContentType.TEXT_PLAIN);
-            StringBody code1 = new StringBody(checkcode, ContentType.TEXT_PLAIN);
-
-            HttpEntity reqEntity = MultipartEntityBuilder.create()
-                    .addPart("textfield", textfield1)
-                    .addPart("code", code1)
-                    .build();
+            List<NameValuePair> params = new ArrayList<>();
+            params.add(new BasicNameValuePair("textfield", textfield));
+            params.add(new BasicNameValuePair("code", checkcode));
+            System.out.println("textfield=" + textfield + "|||" + "code=" + checkcode);
+            UrlEncodedFormEntity reqEntity = new UrlEncodedFormEntity(params);
             httppost.setEntity(reqEntity);
+
             // Create a custom response handler
             ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
                 public String handleResponse(
@@ -277,7 +311,7 @@ public class QueryManager {
                     int status = response.getStatusLine().getStatusCode();
                     if (status >= 200 && status < 300) {
                         HttpEntity entity = response.getEntity();
-                        return entity != null ? EntityUtils.toString(entity) : null;
+                        return entity != null ? EntityUtils.toString(entity, "UTF-8") : null;
                     } else {
                         throw new ClientProtocolException("Unexpected response status: " + status);
                     }
@@ -285,7 +319,52 @@ public class QueryManager {
             };
             String responseBody = httpclient.execute(httppost, responseHandler);
             System.out.println("----------------------------------------");
-            System.out.println(responseBody);
+//            System.out.println(responseBody);
+            return responseBody;
+        } finally {
+            httpclient.close();
+        }
+    }
+
+    /**
+     * 查询详情
+     *
+     * @param detailUrl  详情页面链接
+     * @param jsessionid sessionid
+     * @return 详情页面
+     * @throws Exception
+     */
+    private String showDetail(String detailUrl, String jsessionid) throws Exception {
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        try {
+            HttpGet httpget = new HttpGet(detailUrl);
+            System.out.println("Executing request " + httpget.getRequestLine());
+
+            // 所有请求的通用header：
+            httpget.addHeader("Accept",
+                    "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+            httpget.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36" +
+                    " (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36");
+            httpget.addHeader("Accept-Encoding", "gzip,deflate,sdch");
+            httpget.addHeader("Accept-Language", "zh-CN,zh;q=0.8,en;q=0.6");
+            httpget.addHeader("Cookie", "JSESSIONID=" + jsessionid);
+
+            // Create a custom response handler
+            ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
+                public String handleResponse(
+                        final HttpResponse response) throws ClientProtocolException, IOException {
+                    int status = response.getStatusLine().getStatusCode();
+                    if (status >= 200 && status < 300) {
+                        HttpEntity entity = response.getEntity();
+                        return entity != null ? EntityUtils.toString(entity, "UTF-8") : null;
+                    } else {
+                        throw new ClientProtocolException("Unexpected response status: " + status);
+                    }
+                }
+            };
+            String responseBody = httpclient.execute(httpget, responseHandler);
+            System.out.println("----------------------------------------");
+//            System.out.println(responseBody);
             return responseBody;
         } finally {
             httpclient.close();
@@ -351,7 +430,6 @@ public class QueryManager {
             return tip;
         }
     }
-
 
     public static void main(String[] args) throws Exception {
         instance.search("广州云宏信息科技股份有限公司");
