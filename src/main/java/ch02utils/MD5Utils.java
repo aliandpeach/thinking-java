@@ -19,23 +19,19 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * Description of this file.
+ * 字符串MD5转换
  *
  * @author XiongNeng
  * @version 1.0
  * @since 13-5-21
  */
 public class MD5Utils {
-    /**
-     *@Description: 将字符串转化为MD5
-     */
-
 
     /**
      * @param str
      * @return
      * @Date: 2013-9-6
-     * @Author: lulei
+     * @Author: XiongNeng
      * @Description: 32位小写MD5
      */
     public static String parseStrToMd5L32(String str) {
@@ -46,6 +42,7 @@ public class MD5Utils {
             StringBuilder stringBuffer = new StringBuilder();
             for (byte b : bytes) {
                 int bt = b & 0xff;
+                // 补0操作，比如byte=6的时候toHexString=6，前面要补一个0
                 if (bt < 16) {
                     stringBuffer.append(0);
                 }
@@ -58,11 +55,35 @@ public class MD5Utils {
         return reStr;
     }
 
+    public static String parseStrToMd5L32_(String source) {
+        String s = null;
+        char hexChar[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                'a', 'b', 'c', 'd', 'e', 'f'};
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(source.getBytes());// 使用指定的byte数组更新摘要
+            byte[] hashCalc = md.digest();// 完成哈希计算, 128/8 = 16，字节数组为16位长度
+            char result[] = new char[16 * 2];// MD5结果返回的是32位字符串，每位是16进制表示的
+            int k = 0;
+            // 循环16次，对每个字节进行操作转换
+            for (int i = 0; i < 16; i++) {
+                byte everyByte = hashCalc[i];
+                // 对每个字节的高4位进行处理，逻辑右移，再相与低4位转换
+                result[k++] = hexChar[everyByte >>> 4 & 0xf];
+                result[k++] = hexChar[everyByte & 0xf];
+            }
+            s = new String(result);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return s;
+    }
+
     /**
      * @param str
      * @return
      * @Date: 2013-9-6
-     * @Author: lulei
+     * @Author: XiongNeng
      * @Description: 32位大写MD5
      */
     public static String parseStrToMd5U32(String str) {
@@ -77,8 +98,8 @@ public class MD5Utils {
      * @param str
      * @return
      * @Date: 2013-9-6
-     * @Author: lulei
-     * @Description: 16位小写MD5
+     * @Author: XiongNeng
+     * @Description: 16位大写MD5
      */
     public static String parseStrToMd5U16(String str) {
         String reStr = parseStrToMd5L32(str);
@@ -92,8 +113,8 @@ public class MD5Utils {
      * @param str
      * @return
      * @Date: 2013-9-6
-     * @Author: lulei
-     * @Description: 16位大写MD5
+     * @Author: XiongNeng
+     * @Description: 16位小写MD5
      */
     public static String parseStrToMd5L16(String str) {
         String reStr = parseStrToMd5L32(str);
