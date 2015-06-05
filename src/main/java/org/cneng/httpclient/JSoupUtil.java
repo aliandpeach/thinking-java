@@ -4,6 +4,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.DataInputStream;
 import java.io.FileInputStream;
@@ -16,6 +18,7 @@ import java.io.FileInputStream;
  * @since 2015/2/4
  */
 public class JSoupUtil {
+    private static final Logger _log = LoggerFactory.getLogger(JSoupUtil.class);
     /**
      * 获取链接
      * @param htmlContent html
@@ -27,7 +30,7 @@ public class JSoupUtil {
         Elements content = doc.getElementsByAttributeValue("class", "font16");
         if (content.size() > 0) {
             Element e = content.get(0);
-            System.out.println(e.child(0).attr("href"));
+            _log.info(e.child(0).attr("href"));
             return e.child(0).attr("href");
         }
         return null;
@@ -44,7 +47,7 @@ public class JSoupUtil {
         Element location = doc.select(
                 "table[class=detailsList]:eq(0) > tbody > tr >th:matches(所$):eq(0) + td").first();
         String result = location.text();
-        System.out.println("location=" + result);
+        _log.info("location=" + result);
         return result;
     }
 
@@ -60,7 +63,7 @@ public class JSoupUtil {
 //
 //        String link = xpath.evaluate("//div[@class='list'][1]/ul/li[1]/a/@href", document);
 //
-//        System.out.println("link=" + link);
+//        _log.info("link=" + link);
 //        return link;
 //    }
 
@@ -71,7 +74,7 @@ public class JSoupUtil {
 //        dis.readFully(datainBytes);
 //        dis.close();
 //        String content = new String(datainBytes, 0, datainBytes.length);
-////        System.out.println(content);
+////        _log.info(content);
 //
 //        parseLocation(content);
     }

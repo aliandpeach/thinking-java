@@ -11,7 +11,6 @@ import org.apache.commons.configuration.PropertiesConfiguration;
  */
 
 public class ConfigUtil {
-
     private static ConfigUtil initor = new ConfigUtil();
 
     private PropertiesConfiguration config;

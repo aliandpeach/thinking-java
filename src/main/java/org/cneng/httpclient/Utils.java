@@ -18,6 +18,8 @@ package org.cneng.httpclient;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -43,6 +45,7 @@ import java.util.zip.CheckedInputStream;
  * @since 13-5-21
  */
 public class Utils {
+    private static final Logger _log = LoggerFactory.getLogger(Utils.class);
     public static byte[] toByteArray(File imageFile) throws Exception {
         BufferedImage img = ImageIO.read(imageFile);
         ByteArrayOutputStream buf = new ByteArrayOutputStream((int) imageFile.length());
@@ -105,7 +108,7 @@ public class Utils {
 
             long checksum = cis.getChecksum().getValue();
             cis.close();
-            //System.out.println( Integer.toHexString(new Long(checksum).intValue()));
+            //_log.info( Integer.toHexString(new Long(checksum).intValue()));
             return Integer.toHexString(new Long(checksum).intValue());
 
         } catch (IOException e) {
@@ -171,7 +174,8 @@ public class Utils {
     }
 
     public static String byteArrayToHex(byte[] byteArray) {
-        char[] hexDigits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+        char[] hexDigits = {'0', '1', '2', '3', '4', '5',
+                '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
         char[] resultCharArray = new char[byteArray.length * 2];
         int index = 0;
         for (byte b : byteArray) {
@@ -182,7 +186,6 @@ public class Utils {
     }
 
     //MD5校验函数结束
-
     public static String[] parseServers(String server) {
         String[] temps = server.split(",");
         List<String> list = new ArrayList<>();
@@ -194,17 +197,16 @@ public class Utils {
                 list.add(each[0] + ":" + each[1]);
             }
         }
-        System.out.println(list);
+        _log.info(list.toString());
         return list.toArray(new String[list.size()]);
     }
 
-    public static String downloadPic(String outdir, String urlstr) throws Exception {
+    public static void downloadPic(String outdir, String urlstr) throws Exception {
         //返回的是4位验证码的图片
         URL url = new URL(urlstr);
         File outFile = new File("D:\\work\\a.png");
         OutputStream os = new FileOutputStream(outFile);
-        BufferedReader bf = new BufferedReader(new InputStreamReader(url.openStream()));
-
+//        BufferedReader bf = new BufferedReader(new InputStreamReader(url.openStream()));
         InputStream is = url.openStream();
         byte[] buff = new byte[1024];
         while (true) {    //要注意这种写法
@@ -218,7 +220,6 @@ public class Utils {
         }
         is.close();
         os.close();
-        return null;
     }
 
     /**
@@ -240,7 +241,7 @@ public class Utils {
     }
 
     public static void main(String[] args) throws Exception {
-        downloadPic("D:/work/", "http://gsxt.gdgs.gov.cn/verify.html");
+        downloadPic("D:/work/zpics/", "http://gsxt.gdgs.gov.cn/aiccips/verify.html");
     }
 
 }

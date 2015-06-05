@@ -40,11 +40,14 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.cneng.httpclient.Utils.*;
 import static org.cneng.httpclient.ConfigUtil.get;
 
 public class CheckCodeClient {
+    private static final Logger _log = LoggerFactory.getLogger(CheckCodeClient.class);
     private static final CheckCodeClient instance = new CheckCodeClient();
     private RequestModel model;
 
@@ -121,7 +124,7 @@ public class CheckCodeClient {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpGet httpget = new HttpGet(model.getFlushServer());
-            System.out.println("Executing request " + httpget.getRequestLine());
+            _log.info("Executing request " + httpget.getRequestLine());
             // 所有请求的通用header：
             httpget.addHeader("SID", model.getSwId());
             httpget.addHeader("HASH", Md5(model.getSwId() + model.getSwKeyUpper()));
@@ -145,8 +148,8 @@ public class CheckCodeClient {
 
             };
             String responseBody = httpclient.execute(httpget, responseHandler);
-            System.out.println("----------------------------------------");
-            System.out.println(responseBody);
+            _log.info("----------------------------------------");
+            _log.info(responseBody);
             return parseServers(responseBody);
         } finally {
             httpclient.close();
@@ -160,7 +163,7 @@ public class CheckCodeClient {
             HttpGet httpget = new HttpGet(
                     "http://" + model.getLoginServer() + "/Upload/UULogin.aspx?U="
                             + model.getUname() + "&p=" + model.getPwmd5());
-            System.out.println("Executing request " + httpget.getRequestLine());
+            _log.info("Executing request " + httpget.getRequestLine());
 
             // 所有请求的通用header：
             httpget.addHeader("SID", model.getSwId());
@@ -187,8 +190,8 @@ public class CheckCodeClient {
                 }
             };
             String responseBody = httpclient.execute(httpget, responseHandler);
-            System.out.println("----------------------------------------");
-            System.out.println(responseBody);
+            _log.info("----------------------------------------");
+            _log.info(responseBody);
             return new String[]{responseBody.split("_")[0], responseBody};
         } finally {
             httpclient.close();
@@ -206,7 +209,7 @@ public class CheckCodeClient {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpPost httppost = new HttpPost("http://" + model.getUploadServer() + "/Upload/Processing.aspx");
-            System.out.println("Executing request " + httppost.getRequestLine());
+            _log.info("Executing request " + httppost.getRequestLine());
 
             // 所有请求的通用header：
             httppost.addHeader("SID", model.getSwId());
@@ -251,8 +254,8 @@ public class CheckCodeClient {
                 }
             };
             String responseBody = httpclient.execute(httppost, responseHandler);
-            System.out.println("----------------------------------------");
-            System.out.println(responseBody);
+            _log.info("----------------------------------------");
+            _log.info(responseBody);
             return responseBody;
         } finally {
             httpclient.close();
@@ -271,7 +274,7 @@ public class CheckCodeClient {
         try {
             HttpGet httpget = new HttpGet("http://" + model.getResultServer() +
                     "/Upload/GetResult.aspx?key=" + model.getUserKey() + "&ID=" + checkId);
-            System.out.println("Executing request " + httpget.getRequestLine());
+            _log.info("Executing request " + httpget.getRequestLine());
 
             // 所有请求的通用header：
             httpget.addHeader("SID", model.getSwId());
@@ -296,23 +299,22 @@ public class CheckCodeClient {
             String responseBody = httpclient.execute(httpget, responseHandler);
             while ("-3".equals(responseBody)) {
                 try {
-                    System.out.println("----getResult sleep----");
+                    _log.info("----getResult sleep----");
                     Thread.sleep(Long.parseLong(model.getFlushInternals()));
                     responseBody = httpclient.execute(httpget, responseHandler);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-            System.out.println("----------------------------------------");
-            System.out.println(responseBody);
+            _log.info("----------------------------------------");
+            _log.info("验证码识别结果：" + responseBody);
             return responseBody;
         } finally {
             httpclient.close();
         }
     }
 
-
     public static void main(String[] args) throws Exception {
-        checkCode("D:/work/aa.png");
+        checkCode("D:/work/zpics/htCvixdiS_qk3LO7b4Ky3g.png");
     }
 }

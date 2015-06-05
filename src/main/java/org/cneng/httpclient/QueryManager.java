@@ -26,6 +26,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.Args;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.cneng.httpclient.Utils.*;
 import static org.cneng.httpclient.ConfigUtil.get;
@@ -38,22 +40,23 @@ import static org.cneng.httpclient.ConfigUtil.get;
  * @since 2015/2/3
  */
 public class QueryManager {
+    private static final Logger _log = LoggerFactory.getLogger(QueryManager.class);
     /**
      * 首页地址
      */
-    private String homepageUrl = "http://gsxt.gdgs.gov.cn/";
+    private String homepageUrl = "http://gsxt.gdgs.gov.cn/aiccips/";
     /**
      * 验证码图片生成地址
      */
-    private String verifyPicUrl = "http://gsxt.gdgs.gov.cn/verify.html";
+    private String verifyPicUrl = "http://gsxt.gdgs.gov.cn/aiccips/verify.html";
     /**
      * 验证码服务器验证地址
      */
-    private String checkCodeUrl = "http://gsxt.gdgs.gov.cn/CheckEntContext/checkCode.html";
+    private String checkCodeUrl = "http://gsxt.gdgs.gov.cn/aiccips/CheckEntContext/checkCode.html";
     /**
      * 信息显示URL
      */
-    private String showInfoUrl = "http://gsxt.gdgs.gov.cn/CheckEntContext/showInfo.html";
+    private String showInfoUrl = "http://gsxt.gdgs.gov.cn/aiccips/CheckEntContext/showInfo.html";
     /**
      * 下载的验证码图片文件夹
      */
@@ -61,7 +64,11 @@ public class QueryManager {
 
     private static final QueryManager instance = new QueryManager();
 
-    public QueryManager() {
+    public static QueryManager getInstance() {
+        return instance;
+    }
+
+    private QueryManager() {
         ConfigUtil.getInstance();
         homepageUrl = get("homepageUrl");
         verifyPicUrl = get("verifyPicUrl");
@@ -79,7 +86,7 @@ public class QueryManager {
     public String search(String keyword) {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            System.out.println(sdf.format(new Date()));
+            _log.info(sdf.format(new Date()));
             // 第一步：访问首页获取sessionid
             String jsessionid = fetchSessionId();
             // 第二步：先下载验证码图片到本地
@@ -98,9 +105,9 @@ public class QueryManager {
                 // 第八步：解析详情HTML页面，获取最后的地址
                 return JSoupUtil.parseLocation(detailHtml);
             } else {
-                System.out.println("-----------------error------------------" );
+                _log.info("-----------------error------------------" );
             }
-            System.out.println(sdf.format(new Date()));
+            _log.info(sdf.format(new Date()));
             // ---------------------------------------------------------------------------------
         } catch (Exception e) {
             e.printStackTrace();
@@ -125,7 +132,7 @@ public class QueryManager {
                 setDefaultRequestConfig(globalConfig).setDefaultCookieStore(cookieStore).build();
         try {
             HttpGet httpget = new HttpGet(homepageUrl);
-            System.out.println("Executing request " + httpget.getRequestLine());
+            _log.info("Executing request " + httpget.getRequestLine());
             // 所有请求的通用header：
             httpget.addHeader("User-Agent",
                     "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:33.0) Gecko/20100101 Firefox/33.0");
@@ -150,8 +157,8 @@ public class QueryManager {
             List<Cookie> cookies = context.getCookieStore().getCookies();
             for (Cookie cookie : cookies) {
                 if ("JSESSIONID".equals(cookie.getName())) {
-                    System.out.println(cookie.getName() + ":" + cookie.getValue());
-                    System.out.println("******************************");
+                    _log.info(cookie.getName() + ":" + cookie.getValue());
+                    _log.info("******************************");
                     return cookie.getValue();
                 }
             }
@@ -171,7 +178,7 @@ public class QueryManager {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpGet httpget = new HttpGet(verifyPicUrl + "?random=" + Math.random());
-            System.out.println("Executing request " + httpget.getRequestLine());
+            _log.info("Executing request " + httpget.getRequestLine());
             // 所有请求的通用header：
             httpget.addHeader("Accept", "image/png,image/*;q=0.8,*/*;q=0.5");
             httpget.addHeader("Cookie", "JSESSIONID=" + jsessionId);
@@ -234,7 +241,7 @@ public class QueryManager {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpPost httppost = new HttpPost(checkCodeUrl);
-            System.out.println("Executing request " + httppost.getRequestLine());
+            _log.info("Executing request " + httppost.getRequestLine());
 
             // 所有请求的通用header：
             httppost.addHeader("Accept", "application/json, text/javascript, */*; q=0.01");
@@ -245,7 +252,7 @@ public class QueryManager {
             httppost.addHeader("Accept-Language", "zh-CN,zh;q=0.8,en;q=0.6");
             httppost.addHeader("Cookie", "JSESSIONID=" + jsessionid);
 
-            List<NameValuePair> params = new ArrayList<>();
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("textfield", keywork));
             params.add(new BasicNameValuePair("code", checkcode));
             UrlEncodedFormEntity reqEntity = new UrlEncodedFormEntity(params, "UTF-8");
@@ -264,8 +271,8 @@ public class QueryManager {
                 }
             };
             String responseBody = httpclient.execute(httppost, responseHandler);
-            System.out.println("----------------------------------------");
-            System.out.println(responseBody);
+            _log.info("----------------------------------------");
+            _log.info(responseBody);
             return JSON.parseObject(responseBody, CheckCodeResult.class);
         } finally {
             httpclient.close();
@@ -285,7 +292,7 @@ public class QueryManager {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpPost httppost = new HttpPost(showInfoUrl);
-            System.out.println("Executing request " + httppost.getRequestLine());
+            _log.info("Executing request " + httppost.getRequestLine());
 
             // 所有请求的通用header：
             httppost.addHeader("Accept",
@@ -297,10 +304,10 @@ public class QueryManager {
             httppost.addHeader("Accept-Language", "zh-CN,zh;q=0.8,en;q=0.6");
             httppost.addHeader("Cookie", "JSESSIONID=" + jsessionid);
 
-            List<NameValuePair> params = new ArrayList<>();
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("textfield", textfield));
             params.add(new BasicNameValuePair("code", checkcode));
-            System.out.println("textfield=" + textfield + "|||" + "code=" + checkcode);
+            _log.info("textfield=" + textfield + "|||" + "code=" + checkcode);
             UrlEncodedFormEntity reqEntity = new UrlEncodedFormEntity(params);
             httppost.setEntity(reqEntity);
 
@@ -318,8 +325,8 @@ public class QueryManager {
                 }
             };
             String responseBody = httpclient.execute(httppost, responseHandler);
-            System.out.println("----------------------------------------");
-//            System.out.println(responseBody);
+            _log.info("----------------------------------------");
+//            _log.info(responseBody);
             return responseBody;
         } finally {
             httpclient.close();
@@ -338,7 +345,7 @@ public class QueryManager {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpGet httpget = new HttpGet(detailUrl);
-            System.out.println("Executing request " + httpget.getRequestLine());
+            _log.info("Executing request " + httpget.getRequestLine());
 
             // 所有请求的通用header：
             httpget.addHeader("Accept",
@@ -363,8 +370,8 @@ public class QueryManager {
                 }
             };
             String responseBody = httpclient.execute(httpget, responseHandler);
-            System.out.println("----------------------------------------");
-//            System.out.println(responseBody);
+            _log.info("----------------------------------------");
+//            _log.info(responseBody);
             return responseBody;
         } finally {
             httpclient.close();

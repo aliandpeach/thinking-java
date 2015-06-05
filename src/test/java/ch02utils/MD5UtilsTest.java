@@ -9,7 +9,7 @@ public class MD5UtilsTest {
     @Test
     public void testParseStrToMd5L32() throws Exception {
         System.out.println(MD5Utils.parseStrToMd5L32("admin"));
-        System.out.println(MD5Utils.parseStrToMd5L32_("wusong"));
+        System.out.println(MD5Utils.parseStrToMd5L32_("winhong1"));
     }
 
     @Test

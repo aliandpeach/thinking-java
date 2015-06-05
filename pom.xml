@@ -151,6 +151,12 @@
             <artifactId>jsoup</artifactId>
             <version>1.8.1</version>
         </dependency>
+        <!-- excel poi -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>3.11</version>
+        </dependency>
         <!-- Spring3.2.13依赖-->
         <dependency>
             <groupId>org.springframework</groupId>
