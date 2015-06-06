@@ -13,7 +13,11 @@ import org.slf4j.LoggerFactory;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import static org.cneng.httpclient.ExcelUtil.getDate;
+import static org.cneng.httpclient.ExcelUtil.getString;
 
 /**
  * 检查一份excel企业名单表
@@ -27,29 +31,65 @@ import java.util.List;
 public class ExcelCheck {
     private static final Logger _log = LoggerFactory.getLogger(ExcelCheck.class);
     private Workbook wb;
+    FormulaEvaluator evaluator;
     private QueryManager queryManager;
+
     public ExcelCheck(String filename) throws Exception {
         wb = new SXSSFWorkbook(new XSSFWorkbook(new FileInputStream(filename)), 500);
+        evaluator = wb.getCreationHelper().createFormulaEvaluator();
         queryManager = QueryManager.getInstance();
     }
 
-    public List<String> check() {
+    public List<String> check() throws Exception {
         List<String> result = new ArrayList<String>();
-        //读取第一张表
-        Sheet sheet = wb.getSheetAt(0);
-        //得到总行数
-        int rowNum = sheet.getLastRowNum();
-        _log.info("excel表格总行数为：" + rowNum);
+        try {
+            //读取第一张表
+            Sheet sheet = wb.getSheetAt(0);
+            //得到总行数
+            int rowNum = sheet.getLastRowNum();
+            _log.info("excel表格总行数为：" + rowNum);
 
-        for (int i = 1; i <= rowNum; i++) {
-            Row row = sheet.getRow(i);
+            for (int i = 1; i <= rowNum; i++) {
+                Row row = sheet.getRow(i);
+                // 企业名称
+                String companyName = getString(evaluator, row, 0);
+                // 注册号
+                String taxno = getString(evaluator, row, 1);
+                // 法定代表人
+                String lawPerson = getString(evaluator, row, 2);
+                // 成立日期
+                Date regDate = getDate(evaluator, row, 3);
+                // 住所
+                String location = getString(evaluator, row, 4);
+                // 经营范围
+                String business = getString(evaluator, row, 5);
+                // 股东/发起人
+                String stockholder = getString(evaluator, row, 6);
+                // 具体经营项目
+                String detail = getString(evaluator, row, 7);
+                // 是否有违法
+                String illegal = getString(evaluator, row, 8);
+                // 是否有行政处罚
+                String penalty = getString(evaluator, row, 9);
+                // 是否经常异常
+                String exception = getString(evaluator, row, 10);
+                // 链接
+                String link = getString(evaluator, row, 11);
+                // 判断字体颜色是否为红色
+                CellStyle cellStyle = row.getCell(0).getCellStyle();
+                if (IndexedColors.RED.index == wb.getFontAt(cellStyle
+                        .getFontIndex()).getColor()) {
+                    // 登录工商局网站，通过验证码强行破解后查询企业信息
 
-            // 演示判断为红色
-//            if(IndexedColors.RED.index == wb.getFontAt(wCell.getCellStyle()
-//                    .getFontIndex())
-//                    .getColor()){
+                } else {
+                    // 直接通过后面的链接查询企业信息
+
+                }
+            }
+
+        } finally {
+            wb.close();
         }
-
         return result;
     }
 

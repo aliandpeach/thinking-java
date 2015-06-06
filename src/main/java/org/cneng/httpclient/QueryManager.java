@@ -61,6 +61,7 @@ public class QueryManager {
      * 下载的验证码图片文件夹
      */
     private String outdir = "D:/work/";
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private static final QueryManager instance = new QueryManager();
 
@@ -83,10 +84,54 @@ public class QueryManager {
      * @param keyword 关键字：注册号或者是企业名称
      * @return 企业地址
      */
-    public String search(String keyword) {
+    public String searchLocation(String keyword) {
+        _log.info(sdf.format(new Date()));
+        String result = null;
+        String detailHtml = detailHtml(keyword);
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            _log.info(sdf.format(new Date()));
+            if (detailHtml != null) {
+                // 第八步：解析详情HTML页面，获取最后的地址
+                result = JSoupUtil.parseLocation(detailHtml);
+            }
+            // ---------------------------------------------------------------------------------
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        _log.info(sdf.format(new Date()));
+        return result;
+    }
+
+    /**
+     * 工商局网站上面通过关键字搜索企业信息
+     *
+     * @param keyword 关键字：注册号或者是企业名称
+     * @return 企业详情
+     */
+    public Company searchCompany(String keyword) {
+        _log.info(sdf.format(new Date()));
+        Company result = new Company();
+        String detailHtml = detailHtml(keyword);
+        try {
+            if (detailHtml != null) {
+                // 第八步：解析详情HTML页面，填充公司数据
+
+            }
+            // ---------------------------------------------------------------------------------
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        _log.info(sdf.format(new Date()));
+        return result;
+    }
+
+    /**
+     * 工商局网站上面通过关键字搜索企业，显示详情页面
+     *
+     * @param keyword 关键字：注册号或者是企业名称
+     * @return 详情页面
+     */
+    private String detailHtml(String keyword) {
+        try {
             // 第一步：访问首页获取sessionid
             String jsessionid = fetchSessionId();
             // 第二步：先下载验证码图片到本地
@@ -101,20 +146,15 @@ public class QueryManager {
                 // 第六步：解析出第一条链接地址
                 String link = JSoupUtil.parseLink(searchPage);
                 // 第七步：点击详情链接，获取详情HTML页面
-                String detailHtml = showDetail(link, jsessionid);
-                // 第八步：解析详情HTML页面，获取最后的地址
-                return JSoupUtil.parseLocation(detailHtml);
+                return showDetail(link, jsessionid);
             } else {
                 _log.info("-----------------error------------------" );
             }
-            _log.info(sdf.format(new Date()));
-            // ---------------------------------------------------------------------------------
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
-
 
     /**
      * 先访问首页获取SessionID
@@ -326,7 +366,6 @@ public class QueryManager {
             };
             String responseBody = httpclient.execute(httppost, responseHandler);
             _log.info("----------------------------------------");
-//            _log.info(responseBody);
             return responseBody;
         } finally {
             httpclient.close();
@@ -371,7 +410,6 @@ public class QueryManager {
             };
             String responseBody = httpclient.execute(httpget, responseHandler);
             _log.info("----------------------------------------");
-//            _log.info(responseBody);
             return responseBody;
         } finally {
             httpclient.close();
@@ -382,7 +420,6 @@ public class QueryManager {
         private String flag;
         private String textfield;
         private String tip;
-
         /**
          * 获取 textfield.
          *
@@ -439,6 +476,6 @@ public class QueryManager {
     }
 
     public static void main(String[] args) throws Exception {
-        instance.search("广州云宏信息科技股份有限公司");
+        instance.searchLocation("广州云宏信息科技股份有限公司");
     }
 }
