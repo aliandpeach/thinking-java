@@ -30,10 +30,7 @@ import java.nio.ByteOrder;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
 
@@ -188,7 +185,7 @@ public class Utils {
     //MD5校验函数结束
     public static String[] parseServers(String server) {
         String[] temps = server.split(",");
-        List<String> list = new ArrayList<>();
+        List<String> list = new ArrayList<String>();
         for (String s : temps) {
             String[] each = s.split(":");
             if (each.length < 3) {
@@ -240,8 +237,44 @@ public class Utils {
         return Base64.encodeBase64URLSafeString(bytes);
     }
 
+    /**
+     * 识别算术验证码
+     * @param checkCode
+     * @return
+     */
+    public static String realCode(String checkCode) {
+        if (checkCode.endsWith("等于") && checkCode.length() == 5) {
+            Integer a = numbers.get(checkCode.substring(0,1));
+            String op = checkCode.substring(1,2);
+            Integer b = numbers.get(checkCode.substring(2,3));
+            if ("加".equals(op)) {
+                return String.valueOf(a + b);
+            } else if ("减".equals(op)) {
+                return String.valueOf(a - b);
+            } else if ("乘".equals(op)) {
+                return String.valueOf(a * b);
+            } else {
+                return String.valueOf(a / b);
+            }
+        }
+        return checkCode;
+    }
+    private static final Map<String, Integer> numbers = new HashMap<String, Integer>(){{
+        put("零",0);
+        put("壹",1);
+        put("贰",2);
+        put("叁",3);
+        put("肆",4);
+        put("伍",5);
+        put("陆",6);
+        put("柒",7);
+        put("捌",8);
+        put("玖",9);
+    }};
+
     public static void main(String[] args) throws Exception {
-        downloadPic("D:/work/zpics/", "http://gsxt.gdgs.gov.cn/aiccips/verify.html");
+        //downloadPic("D:/work/zpics/", "http://gsxt.gdgs.gov.cn/aiccips/verify.html");
+        System.out.println(realCode("伍乘捌等于"));
     }
 
 }

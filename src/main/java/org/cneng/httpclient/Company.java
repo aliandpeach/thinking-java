@@ -10,6 +10,8 @@ import java.util.Date;
  * @since 2015/6/6
  */
 public class Company {
+    /** 爬取结果分类 1:正常, 2:吊销, 3:不存在*/
+    private int resultType;
     /** 企业名称 */
     private String companyName;
     /** 注册号 */
@@ -32,6 +34,30 @@ public class Company {
     private String penalty;
     /** 是否经常异常 */
     private String exception;
+    /** 登记状态 */
+    private String status;
+    /** 链接 */
+    private String link;
+
+    @Override
+    public String toString() {
+        return "Company{" +
+                "resultType=" + resultType +
+                ", companyName='" + companyName + '\'' +
+                ", taxno='" + taxno + '\'' +
+                ", lawPerson='" + lawPerson + '\'' +
+                ", regDate=" + regDate +
+                ", location='" + location + '\'' +
+                ", business='" + business + '\'' +
+                ", stockholder='" + stockholder + '\'' +
+                ", detail='" + detail + '\'' +
+                ", illegal='" + illegal + '\'' +
+                ", penalty='" + penalty + '\'' +
+                ", exception='" + exception + '\'' +
+                ", status='" + status + '\'' +
+                ", link='" + link + '\'' +
+                '}';
+    }
 
     /**
      * Gets illegal.
@@ -229,5 +255,59 @@ public class Company {
      */
     public void setStockholder(String stockholder) {
         this.stockholder = stockholder;
+    }
+
+    /**
+     * Sets new 链接.
+     *
+     * @param link New value of 链接.
+     */
+    public void setLink(String link) {
+        this.link = link;
+    }
+
+    /**
+     * Gets 链接.
+     *
+     * @return Value of 链接.
+     */
+    public String getLink() {
+        return link;
+    }
+
+    /**
+     * Gets 爬取结果分类 1:正常, 2:吊销, 3:不存在.
+     *
+     * @return Value of 爬取结果分类 1:正常, 2:吊销, 3:不存在.
+     */
+    public int getResultType() {
+        return resultType;
+    }
+
+    /**
+     * Sets new 爬取结果分类 1:正常, 2:吊销, 3:不存在.
+     *
+     * @param resultType New value of 爬取结果分类 1:正常, 2:吊销, 3:不存在.
+     */
+    public void setResultType(int resultType) {
+        this.resultType = resultType;
+    }
+
+    /**
+     * Sets new 登记状态.
+     *
+     * @param status New value of 登记状态.
+     */
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    /**
+     * Gets 登记状态.
+     *
+     * @return Value of 登记状态.
+     */
+    public String getStatus() {
+        return status;
     }
 }

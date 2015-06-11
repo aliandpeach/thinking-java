@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.http.HttpEntity;
@@ -62,6 +63,8 @@ public class QueryManager {
      */
     private String outdir = "D:/work/";
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private LinkedBlockingQueue<Company> queue;
+    private LinkedBlockingQueue<String> redoQueue;
 
     private static final QueryManager instance = new QueryManager();
 
@@ -76,6 +79,8 @@ public class QueryManager {
         checkCodeUrl = get("checkCodeUrl");
         showInfoUrl = get("showInfoUrl");
         outdir = get("outdir");
+        queue = new LinkedBlockingQueue<>();
+        redoQueue = new LinkedBlockingQueue<>();
     }
 
     /**
@@ -87,7 +92,7 @@ public class QueryManager {
     public String searchLocation(String keyword) {
         _log.info(sdf.format(new Date()));
         String result = null;
-        String detailHtml = detailHtml(keyword);
+        String detailHtml = detailHtml(keyword)[0];
         try {
             if (detailHtml != null) {
                 // 第八步：解析详情HTML页面，获取最后的地址
@@ -105,16 +110,24 @@ public class QueryManager {
      * 工商局网站上面通过关键字搜索企业信息
      *
      * @param keyword 关键字：注册号或者是企业名称
+     * @param type 关键字类型：1-企业名称 2-注册号
      * @return 企业详情
      */
     public Company searchCompany(String keyword) {
         _log.info(sdf.format(new Date()));
         Company result = new Company();
-        String detailHtml = detailHtml(keyword);
+        result.setCompanyName(keyword);
+        String[] dhtml = detailHtml(keyword);
+        String detailHtml = dhtml[0];
+        result.setLink(dhtml[1]);
+        result.setResultType(1);  // 预设是正常的
         try {
             if (detailHtml != null) {
                 // 第八步：解析详情HTML页面，填充公司数据
-
+                JSoupUtil.parseCompany(detailHtml, result);
+            } else {
+                // 说明不存在
+                result.setResultType(3);
             }
             // ---------------------------------------------------------------------------------
         } catch (Exception e) {
@@ -125,12 +138,46 @@ public class QueryManager {
     }
 
     /**
+     * 更加企业名称文件向队列中放置公司信息
+     * @param fileName 企业名列表文件名
+     */
+    public void produceCompany(final String fileName) {
+        new Thread(new Runnable(){
+            public void run() {
+                BufferedReader in = null;
+                try {
+                    in = new BufferedReader(new FileReader(fileName));
+                    String compName;
+                    StringBuilder sb = new StringBuilder();
+                    while ((compName = in.readLine()) != null) {
+                        _log.info("---企业名：" + compName);
+                        Company company = searchCompany(compName);
+                        //生产对象
+                        queue.put(company);
+                    }
+                } catch (Exception e) {
+                    _log.error("读取企业名文件出错。",e);
+                } finally {
+                    _log.info("企业信息爬取结束！");
+                    try {
+                        assert in != null;
+                        in.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+    }
+
+    /**
      * 工商局网站上面通过关键字搜索企业，显示详情页面
      *
      * @param keyword 关键字：注册号或者是企业名称
      * @return 详情页面
      */
-    private String detailHtml(String keyword) {
+    private String[] detailHtml(String keyword) {
+        String[] result = new String[2];
         try {
             // 第一步：访问首页获取sessionid
             String jsessionid = fetchSessionId();
@@ -138,6 +185,8 @@ public class QueryManager {
             String[] downloads = downloadVerifyPic(jsessionid);
             // 第三步：获取验证码
             String checkcode = CheckCodeClient.checkCode(downloads[0]);
+            // 这一步还得处理下验证码
+            checkcode = Utils.realCode(checkcode);
             // 第四步：调用服务器的验证码认证接口
             CheckCodeResult checkCodeResult = authenticate(keyword, checkcode, jsessionid);
             // 第五步：调用查询接口查询结果列表
@@ -145,15 +194,17 @@ public class QueryManager {
                 String searchPage = showInfo(checkCodeResult.getTextfield(), checkcode, jsessionid);
                 // 第六步：解析出第一条链接地址
                 String link = JSoupUtil.parseLink(searchPage);
+                if (link == null) return null;
                 // 第七步：点击详情链接，获取详情HTML页面
-                return showDetail(link, jsessionid);
+                result = showDetail(link, jsessionid);
             } else {
-                _log.info("-----------------error------------------" );
+                _log.error("验证码未能正确识别, 重新查询：" + keyword);
+                redoQueue.put(keyword);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return result;
     }
 
     /**
@@ -380,7 +431,7 @@ public class QueryManager {
      * @return 详情页面
      * @throws Exception
      */
-    private String showDetail(String detailUrl, String jsessionid) throws Exception {
+    private String[] showDetail(String detailUrl, String jsessionid) throws Exception {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpGet httpget = new HttpGet(detailUrl);
@@ -410,7 +461,7 @@ public class QueryManager {
             };
             String responseBody = httpclient.execute(httpget, responseHandler);
             _log.info("----------------------------------------");
-            return responseBody;
+            return new String[]{responseBody, detailUrl};
         } finally {
             httpclient.close();
         }
@@ -476,6 +527,8 @@ public class QueryManager {
     }
 
     public static void main(String[] args) throws Exception {
-        instance.searchLocation("广州云宏信息科技股份有限公司");
+//        instance.searchLocation("广州云宏信息科技股份有限公司");
+        Company c = instance.searchCompany("广州云宏信息科技股份有限公司");
+        System.out.println(c);
     }
 }

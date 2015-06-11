@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.DataInputStream;
 import java.io.FileInputStream;
+import static org.cneng.httpclient.DateUtil.toDate;
 
 /**
  * 利用JSouup解析
@@ -49,6 +50,59 @@ public class JSoupUtil {
         String result = location.text();
         _log.info("location=" + result);
         return result;
+    }
+
+    /**
+     * 获取企业完整信息
+     * @param htmlContent html
+     * @throws Exception
+     */
+    public static void parseCompany(String htmlContent, Company c) throws Exception {
+        Document doc = Jsoup.parse(htmlContent);
+        // 企业名
+        Element nameE = doc.select(
+                "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^名称$) + td").first();
+        c.setCompanyName(nameE.text());
+        // 注册号
+        Element taxnoE = doc.select(
+                "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^注册号$) + td").first();
+        c.setTaxno(taxnoE.text());
+        // 法定代表人
+        Element lawPersonE = doc.select(
+                "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^法定代表人$) + td").first();
+        c.setLawPerson(lawPersonE.text());
+        // 成立日期
+        Element regDateE = doc.select(
+                "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^成立日期$) + td").first();
+        c.setRegDate(toDate(regDateE.text()));
+        // 住所
+        Element location = doc.select(
+                "table[class=detailsList]:eq(0) > tbody > tr >th:matches(所$) + td").first();
+        c.setLocation(location.text());
+        // 经营范围
+        Element business = doc.select(
+                "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^经营范围$) + td").first();
+        c.setBusiness(business.text());
+        // 股东/发起人，这里需要异步再次发起一次请求
+        // http://121.8.226.101:7001/search/search!investorListShow?entityVo.curPage=1&entityVo.pripid=440106106022010041200851
+        //
+        Elements stockholders = doc.select("#tb_body > tr >td:eq(1)");
+        StringBuilder sb = new StringBuilder();
+        for (Element sh : stockholders) {
+            sb.append(sh).append("/");
+        }
+        String stockholder = sb.toString();
+        if (stockholder.length() > 0) {
+            c.setStockholder(stockholder.substring(0, stockholder.length() - 1));
+        }
+        // 登记状态
+        Element status = doc.select(
+                "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^登记状态$) + td").first();
+        String statuss = status.text();
+        c.setStatus(statuss);
+        if (!"存续".equals(statuss)) {
+            c.setResultType(2);  // 已经无效了
+        }
     }
 
 //    private static String parseLinkXpath(String htmlContent) throws Exception {
