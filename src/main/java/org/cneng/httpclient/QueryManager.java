@@ -110,13 +110,14 @@ public class QueryManager {
      * 工商局网站上面通过关键字搜索企业信息
      *
      * @param keyword 关键字：注册号或者是企业名称
-     * @param type 关键字类型：1-企业名称 2-注册号
+     * @param type    关键字类型：1-企业名称 2-注册号
      * @return 企业详情
      */
     public Company searchCompany(String keyword) {
         _log.info(sdf.format(new Date()));
         Company result = new Company();
         result.setCompanyName(keyword);
+        // 这一步是核心算法
         String[] dhtml = detailHtml(keyword);
         String detailHtml = dhtml[0];
         result.setLink(dhtml[1]);
@@ -124,6 +125,7 @@ public class QueryManager {
         try {
             if (detailHtml != null) {
                 // 第八步：解析详情HTML页面，填充公司数据
+
                 JSoupUtil.parseCompany(detailHtml, result);
             } else {
                 // 说明不存在
@@ -138,36 +140,53 @@ public class QueryManager {
     }
 
     /**
-     * 更加企业名称文件向队列中放置公司信息
+     * 根据redo队列中的企业名称去爬取公司信息，向队列中放置公司信息
+     *
      * @param fileName 企业名列表文件名
      */
-    public void produceCompany(final String fileName) {
-        new Thread(new Runnable(){
+    public void produceCompany() {
+        new Thread(new Runnable() {
             public void run() {
-                BufferedReader in = null;
-                try {
-                    in = new BufferedReader(new FileReader(fileName));
-                    String compName;
-                    StringBuilder sb = new StringBuilder();
-                    while ((compName = in.readLine()) != null) {
-                        _log.info("---企业名：" + compName);
+                while (true) {
+                    try {
+                        String compName = redoQueue.take();
                         Company company = searchCompany(compName);
                         //生产对象
                         queue.put(company);
-                    }
-                } catch (Exception e) {
-                    _log.error("读取企业名文件出错。",e);
-                } finally {
-                    _log.info("企业信息爬取结束！");
-                    try {
-                        assert in != null;
-                        in.close();
-                    } catch (IOException e) {
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
+                        break;
                     }
                 }
             }
         }).start();
+    }
+
+    /**
+     * 初始化企业名到redo列表中
+     *
+     * @param fileName 企业名列表文件名
+     */
+    public void initRedo(String fileName) {
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new FileReader(fileName));
+            String compName;
+            StringBuilder sb = new StringBuilder();
+            while ((compName = in.readLine()) != null) {
+                _log.info("---企业名：" + compName);
+                redoQueue.put(compName);
+            }
+        } catch (Exception e) {
+            _log.error("读取企业名文件出错。", e);
+        } finally {
+            try {
+                assert in != null;
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -179,27 +198,37 @@ public class QueryManager {
     private String[] detailHtml(String keyword) {
         String[] result = new String[2];
         try {
-            // 第一步：访问首页获取sessionid
-            String jsessionid = fetchSessionId();
-            // 第二步：先下载验证码图片到本地
-            String[] downloads = downloadVerifyPic(jsessionid);
-            // 第三步：获取验证码
-            String checkcode = CheckCodeClient.checkCode(downloads[0]);
-            // 这一步还得处理下验证码
-            checkcode = Utils.realCode(checkcode);
-            // 第四步：调用服务器的验证码认证接口
-            CheckCodeResult checkCodeResult = authenticate(keyword, checkcode, jsessionid);
-            // 第五步：调用查询接口查询结果列表
-            if ("1".equals(checkCodeResult.getFlag())) {
-                String searchPage = showInfo(checkCodeResult.getTextfield(), checkcode, jsessionid);
-                // 第六步：解析出第一条链接地址
-                String link = JSoupUtil.parseLink(searchPage);
+            String link;
+            if (Utils.idMap.containsKey(keyword)) {
+                link = Utils.idMap.get(keyword);
                 if (link == null) return null;
                 // 第七步：点击详情链接，获取详情HTML页面
-                result = showDetail(link, jsessionid);
+                result = showDetail(link, null);
             } else {
-                _log.error("验证码未能正确识别, 重新查询：" + keyword);
-                redoQueue.put(keyword);
+                // 第一步：访问首页获取sessionid
+                String jsessionid = fetchSessionId();
+                // 第二步：先下载验证码图片到本地
+                String[] downloads = downloadVerifyPic(jsessionid);
+                // 第三步：获取验证码
+                String checkcode = CheckCodeClient.checkCode(downloads[0]);
+                // 这一步还得处理下验证码
+                checkcode = Utils.realCode(checkcode);
+                // 第四步：调用服务器的验证码认证接口
+                CheckCodeResult checkCodeResult = authenticate(keyword, checkcode, jsessionid);
+                // 第五步：调用查询接口查询结果列表
+                if ("1".equals(checkCodeResult.getFlag())) {
+                    String searchPage = showInfo(checkCodeResult.getTextfield(), checkcode, jsessionid);
+                    // 第六步：解析出第一条链接地址
+                    link = JSoupUtil.parseLink(searchPage);
+                    // 把link存起来
+                    Utils.idMap.put(keyword, link);
+                    if (link == null) return null;
+                    // 第七步：点击详情链接，获取详情HTML页面
+                    result = showDetail(link, jsessionid);
+                } else {
+                    _log.error("验证码未能正确识别, 重新查询：" + keyword);
+                    redoQueue.put(keyword);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -431,7 +460,7 @@ public class QueryManager {
      * @return 详情页面
      * @throws Exception
      */
-    private String[] showDetail(String detailUrl, String jsessionid) throws Exception {
+    public String[] showDetail(String detailUrl, String jsessionid) throws Exception {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpGet httpget = new HttpGet(detailUrl);
@@ -444,7 +473,7 @@ public class QueryManager {
                     " (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36");
             httpget.addHeader("Accept-Encoding", "gzip,deflate,sdch");
             httpget.addHeader("Accept-Language", "zh-CN,zh;q=0.8,en;q=0.6");
-            httpget.addHeader("Cookie", "JSESSIONID=" + jsessionid);
+            if (jsessionid != null) httpget.addHeader("Cookie", "JSESSIONID=" + jsessionid);
 
             // Create a custom response handler
             ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
@@ -471,6 +500,7 @@ public class QueryManager {
         private String flag;
         private String textfield;
         private String tip;
+
         /**
          * 获取 textfield.
          *

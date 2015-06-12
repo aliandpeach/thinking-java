@@ -84,8 +84,8 @@ public class JSoupUtil {
                 "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^经营范围$) + td").first();
         c.setBusiness(business.text());
         // 股东/发起人，这里需要异步再次发起一次请求
-        // http://121.8.226.101:7001/search/search!investorListShow?entityVo.curPage=1&entityVo.pripid=440106106022010041200851
-        //
+        // http://121.8.226.101:7001/search/search!investorListShow?entityVo.pripid=440106106022010041200851
+
         Elements stockholders = doc.select("#tb_body > tr >td:eq(1)");
         StringBuilder sb = new StringBuilder();
         for (Element sh : stockholders) {

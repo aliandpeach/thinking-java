@@ -31,6 +31,7 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
 
@@ -43,6 +44,7 @@ import java.util.zip.CheckedInputStream;
  */
 public class Utils {
     private static final Logger _log = LoggerFactory.getLogger(Utils.class);
+    public static final Map<String, String> idMap = new ConcurrentHashMap<>();
     public static byte[] toByteArray(File imageFile) throws Exception {
         BufferedImage img = ImageIO.read(imageFile);
         ByteArrayOutputStream buf = new ByteArrayOutputStream((int) imageFile.length());
