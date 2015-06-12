@@ -5,7 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.http.HttpEntity;
@@ -63,7 +64,7 @@ public class QueryManager {
      */
     private String outdir = "D:/work/";
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private LinkedBlockingQueue<Company> queue;
+    private LinkedBlockingQueue<Company> compQueue;
     private LinkedBlockingQueue<String> redoQueue;
 
     private static final QueryManager instance = new QueryManager();
@@ -79,7 +80,7 @@ public class QueryManager {
         checkCodeUrl = get("checkCodeUrl");
         showInfoUrl = get("showInfoUrl");
         outdir = get("outdir");
-        queue = new LinkedBlockingQueue<>();
+        compQueue = new LinkedBlockingQueue<>();
         redoQueue = new LinkedBlockingQueue<>();
     }
 
@@ -119,14 +120,18 @@ public class QueryManager {
         result.setCompanyName(keyword);
         // 这一步是核心算法
         String[] dhtml = detailHtml(keyword);
-        String detailHtml = dhtml[0];
-        result.setLink(dhtml[1]);
+        String detailHtml = dhtml != null ? dhtml[0] : null;
+        result.setLink(dhtml != null ? dhtml[1] : null);
         result.setResultType(1);  // 预设是正常的
         try {
             if (detailHtml != null) {
                 // 第八步：解析详情HTML页面，填充公司数据
-
-                JSoupUtil.parseCompany(detailHtml, result);
+                // 这里我需要再去异步提交一个HTTP请求
+                // http://121.8.226.101:7001/search/search!entityShow?entityVo.pripid=440106106022010041200851
+                // http://121.8.226.101:7001/search/search!investorListShow?entityVo.pripid=440106106022010041200851
+                String link2 = result.getLink().replace("entityShow", "investorListShow");
+                String investorHtml = showDetail(link2, null)[0];
+                JSoupUtil.parseCompany(detailHtml, investorHtml, result);
             } else {
                 // 说明不存在
                 result.setResultType(3);
@@ -141,25 +146,148 @@ public class QueryManager {
 
     /**
      * 根据redo队列中的企业名称去爬取公司信息，向队列中放置公司信息
-     *
-     * @param fileName 企业名列表文件名
      */
-    public void produceCompany() {
-        new Thread(new Runnable() {
-            public void run() {
-                while (true) {
+    private void produceCompany() {
+        int threadCount = 6;
+        //障栅集合点(同步器)
+        final CyclicBarrier barrier = new CyclicBarrier(threadCount + 1);
+        ExecutorService executorService = Executors.newCachedThreadPool(
+                new NamedThreadPoolFactory("---爬取公司信息---"));
+        _log.info("--------爬取公司信息开始---------");
+        for (int i = 0; i < threadCount - 1; i++) {
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
                     try {
-                        String compName = redoQueue.take();
-                        Company company = searchCompany(compName);
-                        //生产对象
-                        queue.put(company);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        break;
+                        while (true) {
+                            try {
+                                //if (redoQueue.isEmpty()) break;
+                                String compName = redoQueue.poll(10000L, TimeUnit.MILLISECONDS);
+                                _log.info("获取到的company name=" + compName);
+                                if (compName == null) break;
+                                Company company = searchCompany(compName);
+                                //生产对象
+                                compQueue.put(company);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                                break;
+                            }
+                        }
+                        barrier.await();
+                    } catch (Exception e) {
+                        _log.error("爬取公司信息", e);
                     }
                 }
+            });
+        }
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    //execException(2000L);
+                    barrier.await();
+                } catch (Exception e) {
+                    _log.error("=============error=========${e}", e);
+                    e.printStackTrace();
+                }
             }
-        }).start();
+        });
+        try {
+            barrier.await();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        executorService.shutdown();
+        _log.info("--------爬取公司信息结束---------");
+    }
+
+    /**
+     * 最后更新公司信息到数据库中
+     */
+    private void lastUpdateCompany() {
+        int threadCount = 6;
+        //障栅集合点(同步器)
+        final CyclicBarrier barrier = new CyclicBarrier(threadCount + 1);
+        ExecutorService executorService = Executors.newCachedThreadPool(
+                new NamedThreadPoolFactory("---更新公司信息---"));
+        _log.info("--------更新公司信息开始---------");
+        for (int i = 0; i < threadCount - 1; i++) {
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    JdbcUtils.endCompany(instance.compQueue);
+                }
+            });
+        }
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    barrier.await();
+                } catch (Exception e) {
+                    _log.error("=============error=========${e}", e);
+                    e.printStackTrace();
+                }
+            }
+        });
+        try {
+            barrier.await();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        executorService.shutdown();
+        _log.info("--------更新公司信息结束---------");
+    }
+
+    /**
+     * 最后更新idmap
+     */
+    private void lastUpdateIdMap() {
+        int threadCount = 6;
+        //障栅集合点(同步器)
+        final CyclicBarrier barrier = new CyclicBarrier(threadCount + 1);
+        ExecutorService executorService = Executors.newCachedThreadPool(
+                new NamedThreadPoolFactory("---更新IdMap---"));
+        _log.info("--------更新IdMap开始---------");
+        for (int i = 0; i < threadCount - 1; i++) {
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    JdbcUtils.endIdMap(Utils.idMap);
+                }
+            });
+        }
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    barrier.await();
+                } catch (Exception e) {
+                    _log.error("=============error=========${e}", e);
+                    e.printStackTrace();
+                }
+            }
+        });
+        try {
+            barrier.await();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        executorService.shutdown();
+        _log.info("--------更新IdMap结束---------");
+    }
+
+    private static class NamedThreadPoolFactory implements ThreadFactory {
+        String name;
+        final AtomicInteger threadNumber = new AtomicInteger(1);
+
+        NamedThreadPoolFactory(String name) {
+            this.name = name;
+        }
+
+        public Thread newThread(Runnable r) {
+            return new Thread(r, name + threadNumber.getAndIncrement());
+        }
     }
 
     /**
@@ -170,12 +298,14 @@ public class QueryManager {
     public void initRedo(String fileName) {
         BufferedReader in = null;
         try {
-            in = new BufferedReader(new FileReader(fileName));
+            in = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(fileName), "UTF-8"));
             String compName;
-            StringBuilder sb = new StringBuilder();
             while ((compName = in.readLine()) != null) {
-                _log.info("---企业名：" + compName);
-                redoQueue.put(compName);
+                if (StringUtil.isNotBlank(compName)) {
+                    _log.info("---企业名：" + compName);
+                    redoQueue.put(compName);
+                }
             }
         } catch (Exception e) {
             _log.error("读取企业名文件出错。", e);
@@ -221,8 +351,12 @@ public class QueryManager {
                     // 第六步：解析出第一条链接地址
                     link = JSoupUtil.parseLink(searchPage);
                     // 把link存起来
-                    Utils.idMap.put(keyword, link);
-                    if (link == null) return null;
+                    if(StringUtil.isNotBlank(link)) {
+                        Utils.idMap.put(keyword, link);
+                    } else {
+                        redoQueue.put(keyword);
+                    }
+                    if (link == null) return result;
                     // 第七步：点击详情链接，获取详情HTML页面
                     result = showDetail(link, jsessionid);
                 } else {
@@ -231,7 +365,7 @@ public class QueryManager {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            _log.error("通过关键字搜索企业error", e);
         }
         return result;
     }
@@ -557,8 +691,29 @@ public class QueryManager {
     }
 
     public static void main(String[] args) throws Exception {
-//        instance.searchLocation("广州云宏信息科技股份有限公司");
-        Company c = instance.searchCompany("广州云宏信息科技股份有限公司");
-        System.out.println(c);
+        // instance.searchLocation("广州云宏信息科技股份有限公司");
+        _log.info("第一步：先把要爬取的企业名列表放到redo中去");
+        instance.initRedo(
+                "D:/work/projects/gitprojects/thinking-java/src/main/resources/names.txt");
+        _log.info("第二步：初始化idmap");
+        JdbcUtils.startIdMap(Utils.idMap);
+        _log.info("第三步：初始化公司表");
+        JdbcUtils.startCompany(instance.redoQueue);
+        _log.info("第四步：线程池实现抓取动作");
+        instance.produceCompany();
+        _log.info("第五步：等待所有线程执行完后更新idmap");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                instance.lastUpdateIdMap();
+            }
+        }).start();
+        _log.info("第六步：更新公司信息");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                instance.lastUpdateCompany();
+            }
+        }).start();
     }
 }

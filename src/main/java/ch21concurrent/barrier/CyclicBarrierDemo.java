@@ -42,8 +42,9 @@ class CyclicBarrierDemo {
      */
     public static void main(String[] args) {
 //        testCyclic();
-        testFutureThreadPool(3);
+//        testFutureThreadPool(3);
 //        testThreadPool();
+        execCyclicTask();
     }
 
     /**

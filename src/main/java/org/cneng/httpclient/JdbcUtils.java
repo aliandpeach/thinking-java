@@ -1,13 +1,15 @@
 package org.cneng.httpclient;
 
 import ch17database.Record;
+import org.cneng.pool.c3p0.JdbcUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.sql.Date;
+import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,65 +19,62 @@ import java.util.Properties;
  * JdbcUtils
  */
 public class JdbcUtils {
+    private static final Logger _log = LoggerFactory.getLogger(JdbcUtil.class);
     /**
      * 测试JdbcUtils的各个方法
      *
      */
     public static void main(String[] args) throws Exception {
-        Connection connection = getConnection();
-
-        /******************测试插入操作*****************/
-        String insertSql = "insert into record(description,content,createdTime,modifyTime) values (?,?,?,?)";
-        for (int i = 0; i < 100; i++) {
-            List<String> insertParam = new ArrayList<String>();
-            insertParam.add("this is record " + i);
-            insertParam.add("record " + i + "content");
-            insertParam.add("2012-07-04");
-            insertParam.add("2012-07-04");
-            updateDataByJdbc(connection, insertSql, insertParam);
-        }
-
-        /******************测试更新操作*****************/
-        String updateSql = "update record set description=? where id=?";
-        List<String> updateParam = new ArrayList<String>();
-        updateParam.add("update update update");
-        updateParam.add("1");
-        updateDataByJdbc(connection, updateSql, updateParam);
-
-        /******************测试删除操作*****************/
-        String deleteSql = "delete from record where id=?";
-        List<String> deleteParam = new ArrayList<String>();
-        deleteParam.add("2");
-        updateDataByJdbc(connection, deleteSql, deleteParam);
-
-        /******************测试数目查询操作*****************/
-        String countSql = "select count(*) from record where content like ? ; ";
-        List<String> countParam = new ArrayList<String>();
-        countParam.add("%cont%");
-        System.out.println("查询总数目为" + queryCountByJdbc(connection, countSql, countParam));
-
-        /******************测试普通查询操作*****************/
-        String querySql = "select * from record where content like ?";
-        List<String> queryParam = new ArrayList<String>();
-        queryParam.add("%cont%");
-        List<Record> commonList = queryDataByJdbc(connection, querySql, queryParam);
-        System.out.println("普通查询结果：");
-        for (Record r : commonList) {
-            System.out.println(r);
-        }
-
-        /******************测试分页查询操作*****************/
-        String pageQuerySql = "select * from record where content like ?";
-        List<String> pageQueryParam = new ArrayList<String>();
-        pageQueryParam.add("%cont%");
-        List<Record> pageList = queryPageDataByJdbc(connection, pageQuerySql, pageQueryParam, 20, 20);
-        System.out.println("分页查询结果：");
-        for (Record r : pageList) {
-            System.out.println(r);
-        }
-        if (connection != null) {
-            connection.close();
-        }
+        startIdMap(new HashMap<>());
+//        /******************测试插入操作*****************/
+//        String insertSql = "insert into record(description,content,createdTime,modifyTime) values (?,?,?,?)";
+//        for (int i = 0; i < 100; i++) {
+//            List<String> insertParam = new ArrayList<String>();
+//            insertParam.add("this is record " + i);
+//            insertParam.add("record " + i + "content");
+//            insertParam.add("2012-07-04");
+//            insertParam.add("2012-07-04");
+//            updateDataByJdbc(connection, insertSql, insertParam);
+//        }
+//
+//        /******************测试更新操作*****************/
+//        String updateSql = "update record set description=? where id=?";
+//        List<String> updateParam = new ArrayList<String>();
+//        updateParam.add("update update update");
+//        updateParam.add("1");
+//        updateDataByJdbc(connection, updateSql, updateParam);
+//
+//        /******************测试删除操作*****************/
+//        String deleteSql = "delete from record where id=?";
+//        List<String> deleteParam = new ArrayList<String>();
+//        deleteParam.add("2");
+//        updateDataByJdbc(connection, deleteSql, deleteParam);
+//
+//        /******************测试数目查询操作*****************/
+//        String countSql = "select count(*) from record where content like ? ; ";
+//        List<String> countParam = new ArrayList<String>();
+//        countParam.add("%cont%");
+//        System.out.println("查询总数目为" + queryCountByJdbc(connection, countSql, countParam));
+//
+//        /******************测试普通查询操作*****************/
+//        String querySql = "select * from record where content like ?";
+//        List<String> queryParam = new ArrayList<String>();
+//        queryParam.add("%cont%");
+//        List<Record> commonList = queryDataByJdbc(connection, querySql, queryParam);
+//        System.out.println("普通查询结果：");
+//        for (Record r : commonList) {
+//            System.out.println(r);
+//        }
+//
+//        /******************测试分页查询操作*****************/
+//        String pageQuerySql = "select * from record where content like ?";
+//        List<String> pageQueryParam = new ArrayList<String>();
+//        pageQueryParam.add("%cont%");
+//        List<Record> pageList = queryPageDataByJdbc(connection, pageQuerySql, pageQueryParam, 20, 20);
+//        System.out.println("分页查询结果：");
+//        for (Record r : pageList) {
+//            System.out.println(r);
+//        }
     }
 
     /**
@@ -127,7 +126,11 @@ public class JdbcUtils {
         String updateSQL = "UPDATE t_idmap SET sid=? WHERE name=?";
         try {
             conn = getConnection();
-            for (String k : map.keySet()) {
+            Iterator<Map.Entry<String ,String>> iter = map.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry<String ,String> each = iter.next();
+                String k = each.getKey();
+                String v = each.getValue();
                 ps1 = conn.prepareStatement(selectSQL);
                 ps1.setString(1, k);
                 int count = 0;
@@ -138,11 +141,11 @@ public class JdbcUtils {
                 if (count == 0) {
                     ps2 = conn.prepareStatement(insertSQL);
                     ps2.setString(1, k);
-                    ps2.setString(2, map.get(k));
+                    ps2.setString(2, v);
                     ps2.executeUpdate();
                 } else {
                     ps3 = conn.prepareStatement(updateSQL);
-                    ps3.setString(1, map.get(k));
+                    ps3.setString(1, v);
                     ps3.setString(2, k);
                     ps3.executeUpdate();
                 }
@@ -153,7 +156,10 @@ public class JdbcUtils {
                 if (ps3 != null) {
                     ps3.close();
                 }
+                _log.info("iter.remove()....");
+                iter.remove();
             }
+            _log.info("----endIdMap进程执行完成----");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -167,6 +173,102 @@ public class JdbcUtils {
                 if (ps3 != null) {
                     ps3.close();
                 }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 初始化公司表
+     * @param map
+     */
+    public static void startCompany(LinkedBlockingQueue<String> redoQueue) {
+        Connection conn = null;
+        String clearSQL = "DELETE FROM t_scompany";
+        String insertSQL = "INSERT INTO t_scompany(company_name) VALUES(?)";
+        try {
+            conn = getConnection();
+            PreparedStatement ps1 = conn.prepareStatement(clearSQL);
+            ps1.executeUpdate();
+            ps1.close();
+            for (String k : redoQueue) {
+                PreparedStatement ps2 = conn.prepareStatement(insertSQL);
+                ps2.setString(1, k);
+                ps2.executeUpdate();
+                ps2.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 更新公司表
+     * @param map
+     */
+    public static void endCompany(LinkedBlockingQueue<Company> compQueue) {
+        Connection conn = null;
+        String updateSQL = "UPDATE t_scompany SET " +
+                "result_type=?" +
+                ",taxno=?" +
+                ",law_person=?" +
+                ",reg_date=?" +
+                ",location=?" +
+                ",business=?" +
+                ",stockholder=?" +
+                ",detail=?" +
+                ",illegal=?" +
+                ",penalty=?" +
+                ",exception=?" +
+                ",status=?" +
+                ",link=? " +
+                "WHERE company_name=?";
+        try {
+            conn = getConnection();
+            //队列方式遍历，元素逐个被移除
+            while (true) {
+                Company c = compQueue.poll();
+                if (c == null) break;
+                PreparedStatement ps2 = conn.prepareStatement(updateSQL);
+                ps2.setInt(1, c.getResultType());
+                ps2.setString(2, c.getTaxno());
+                ps2.setString(3, c.getLawPerson());
+                if (c.getRegDate() != null) {
+                    ps2.setDate(4, new java.sql.Date(c.getRegDate().getTime()));
+                } else {
+                    ps2.setDate(4, null);
+                }
+                ps2.setString(5, c.getLocation());
+                ps2.setString(6, c.getBusiness());
+                ps2.setString(7, c.getStockholder());
+                ps2.setString(8, c.getDetail());
+                ps2.setString(9, c.getIllegal());
+                ps2.setString(10, c.getPenalty());
+                ps2.setString(11, c.getException());
+                ps2.setString(12, c.getStatus());
+                ps2.setString(13, c.getLink());
+                ps2.setString(14, c.getCompanyName());
+
+                ps2.executeUpdate();
+                ps2.close();
+            }
+            _log.info("----endCompany进程执行完成----");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
                 if (conn != null) {
                     conn.close();
                 }
@@ -198,12 +300,12 @@ public class JdbcUtils {
             String username = props.getProperty("jdbc.username");
             String password = props.getProperty("jdbc.password");
             conn = DriverManager.getConnection(url, username, password);
-            System.out.println("Database connection established");
+            _log.info("Database connection established");
         } catch (Exception e) {
-            System.err.println("Cannot connect to database server");
+            _log.error("Cannot connect to database server");
             if (conn != null) {
                 conn.close();
-                System.out.println("Database connection terminated");
+                _log.info("Database connection terminated");
                 return null;
             }
         }

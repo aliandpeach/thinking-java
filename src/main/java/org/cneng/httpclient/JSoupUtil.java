@@ -1,5 +1,8 @@
 package org.cneng.httpclient;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -31,7 +34,7 @@ public class JSoupUtil {
         Elements content = doc.getElementsByAttributeValue("class", "font16");
         if (content.size() > 0) {
             Element e = content.get(0);
-            _log.info(e.child(0).attr("href"));
+            _log.info("获取链接href=" + e.child(0).attr("href"));
             return e.child(0).attr("href");
         }
         return null;
@@ -57,7 +60,7 @@ public class JSoupUtil {
      * @param htmlContent html
      * @throws Exception
      */
-    public static void parseCompany(String htmlContent, Company c) throws Exception {
+    public static void parseCompany(String htmlContent, String investorHtml, Company c) throws Exception {
         Document doc = Jsoup.parse(htmlContent);
         // 企业名
         Element nameE = doc.select(
@@ -84,17 +87,7 @@ public class JSoupUtil {
                 "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^经营范围$) + td").first();
         c.setBusiness(business.text());
         // 股东/发起人，这里需要异步再次发起一次请求
-        // http://121.8.226.101:7001/search/search!investorListShow?entityVo.pripid=440106106022010041200851
-
-        Elements stockholders = doc.select("#tb_body > tr >td:eq(1)");
-        StringBuilder sb = new StringBuilder();
-        for (Element sh : stockholders) {
-            sb.append(sh).append("/");
-        }
-        String stockholder = sb.toString();
-        if (stockholder.length() > 0) {
-            c.setStockholder(stockholder.substring(0, stockholder.length() - 1));
-        }
+        c.setStockholder(fetchInvestor(investorHtml));
         // 登记状态
         Element status = doc.select(
                 "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^登记状态$) + td").first();
@@ -103,6 +96,19 @@ public class JSoupUtil {
         if (!"存续".equals(statuss)) {
             c.setResultType(2);  // 已经无效了
         }
+    }
+
+    private static String fetchInvestor(String investorHtml) {
+        JSONObject root = JSON.parseObject(investorHtml);
+        JSONArray array = root.getJSONArray("investorList");
+        StringBuilder sb = new StringBuilder();
+        for(Object o: array) {
+            JSONObject json = (JSONObject)o;
+            sb.append(json.getString("inv")).append("/");
+        }
+        String sbs = sb.toString();
+        if (sbs.length() > 0) return sbs.substring(0, sbs.length() - 1);
+        return null;
     }
 
 //    private static String parseLinkXpath(String htmlContent) throws Exception {
