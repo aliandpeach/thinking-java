@@ -129,6 +129,7 @@ public class JdbcUtils {
             Iterator<Map.Entry<String ,String>> iter = map.entrySet().iterator();
             while (iter.hasNext()) {
                 Map.Entry<String ,String> each = iter.next();
+                iter.remove();
                 String k = each.getKey();
                 String v = each.getValue();
                 ps1 = conn.prepareStatement(selectSQL);
@@ -157,7 +158,6 @@ public class JdbcUtils {
                     ps3.close();
                 }
                 _log.info("iter.remove()....");
-                iter.remove();
             }
             _log.info("----endIdMap进程执行完成----");
         } catch (Exception e) {

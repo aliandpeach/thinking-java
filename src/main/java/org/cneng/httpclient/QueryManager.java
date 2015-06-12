@@ -216,6 +216,11 @@ public class QueryManager {
                 @Override
                 public void run() {
                     JdbcUtils.endCompany(instance.compQueue);
+                    try {
+                        barrier.await();
+                    } catch (Exception e) {
+                        _log.error("更新公司信息线程await出错...");
+                    }
                 }
             });
         }
@@ -243,6 +248,9 @@ public class QueryManager {
      * 最后更新idmap
      */
     private void lastUpdateIdMap() {
+        // 先更新下idMapQueue
+        Utils.updateIdMapQueue();
+        // 总线程数
         int threadCount = 6;
         //障栅集合点(同步器)
         final CyclicBarrier barrier = new CyclicBarrier(threadCount + 1);
@@ -254,6 +262,11 @@ public class QueryManager {
                 @Override
                 public void run() {
                     JdbcUtils.endIdMap(Utils.idMap);
+                    try {
+                        barrier.await();
+                    } catch (Exception e) {
+                        _log.error("更新IdMap线程await出错出错...");
+                    }
                 }
             });
         }
@@ -352,7 +365,8 @@ public class QueryManager {
                     link = JSoupUtil.parseLink(searchPage);
                     // 把link存起来
                     if(StringUtil.isNotBlank(link)) {
-                        Utils.idMap.put(keyword, link);
+                        Utils.updateIdMap(keyword, link);
+                        //Utils.idMap.put(keyword, link);
                     } else {
                         redoQueue.put(keyword);
                     }
@@ -366,6 +380,11 @@ public class QueryManager {
             }
         } catch (Exception e) {
             _log.error("通过关键字搜索企业error", e);
+            try {
+                redoQueue.put(keyword);
+            } catch (InterruptedException e1) {
+                _log.error("通过关键字搜索企业error->InterruptedException", e1);
+            }
         }
         return result;
     }

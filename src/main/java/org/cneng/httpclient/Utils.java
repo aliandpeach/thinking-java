@@ -32,6 +32,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
 
@@ -45,6 +46,18 @@ import java.util.zip.CheckedInputStream;
 public class Utils {
     private static final Logger _log = LoggerFactory.getLogger(Utils.class);
     public static final Map<String, String> idMap = new ConcurrentHashMap<>();
+    public static final LinkedBlockingQueue<String[]> idMapQueue = new LinkedBlockingQueue<>();
+
+    public static void updateIdMapQueue() {
+        for (String k : idMap.keySet()) {
+            try {
+                idMapQueue.put(new String[]{k, idMap.get(k)});
+            } catch (InterruptedException e) {
+                _log.error("填充idMapQueue时候出错...", e);
+            }
+        }
+    }
+
     public static byte[] toByteArray(File imageFile) throws Exception {
         BufferedImage img = ImageIO.read(imageFile);
         ByteArrayOutputStream buf = new ByteArrayOutputStream((int) imageFile.length());
@@ -55,6 +68,12 @@ public class Utils {
             return null;
         }
         return buf.toByteArray();
+    }
+
+    public static synchronized void updateIdMap(String key, String link) {
+        if (!idMap.containsKey(key)) {
+            idMap.put(key, link);
+        }
     }
 
     public static byte[] toByteArrayFromFile(String imageFile) throws Exception {
