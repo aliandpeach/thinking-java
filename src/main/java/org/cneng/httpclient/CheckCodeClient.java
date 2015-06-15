@@ -115,7 +115,7 @@ public class CheckCodeClient {
                 return instance.getResult(uploadResult);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            _log.error("checkCode出错了。");
         }
         return null;
     }
@@ -297,9 +297,14 @@ public class CheckCodeClient {
                 }
             };
             String responseBody = httpclient.execute(httpget, responseHandler);
+            _log.info("responseBody=" + responseBody);
+            int count = 1;
             while ("-3".equals(responseBody)) {
+                if (count++ > 100) {
+                    return null;
+                }
                 try {
-                    _log.info("----getResult sleep----");
+                    //_log.info("----getResult sleep----");
                     Thread.sleep(Long.parseLong(model.getFlushInternals()));
                     responseBody = httpclient.execute(httpget, responseHandler);
                 } catch (InterruptedException e) {

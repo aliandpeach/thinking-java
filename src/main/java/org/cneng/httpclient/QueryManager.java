@@ -355,6 +355,10 @@ public class QueryManager {
                 String[] downloads = downloadVerifyPic(jsessionid);
                 // 第三步：获取验证码
                 String checkcode = CheckCodeClient.checkCode(downloads[0]);
+                if (checkcode == null) {
+                    redoQueue.put(keyword);
+                    return null;
+                }
                 // 这一步还得处理下验证码
                 checkcode = Utils.realCode(checkcode);
                 // 第四步：调用服务器的验证码认证接口
