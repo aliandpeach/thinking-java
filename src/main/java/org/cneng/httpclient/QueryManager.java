@@ -317,6 +317,7 @@ public class QueryManager {
             while ((compName = in.readLine()) != null) {
                 if (StringUtil.isNotBlank(compName)) {
                     _log.info("---企业名：" + compName);
+                    compName = compName.replaceAll("（", "(").replaceAll("）", ")");
                     redoQueue.put(compName);
                 }
             }

@@ -65,36 +65,38 @@ public class JSoupUtil {
         // 企业名
         Element nameE = doc.select(
                 "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^名称$) + td").first();
-        c.setCompanyName(nameE.text());
+        if (nameE != null) c.setCompanyName(nameE.text());
         // 注册号
         Element taxnoE = doc.select(
                 "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^注册号$) + td").first();
-        c.setTaxno(taxnoE.text());
+        if (taxnoE != null) c.setTaxno(taxnoE.text());
         // 法定代表人
         Element lawPersonE = doc.select(
-                "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^法定代表人$) + td").first();
-        c.setLawPerson(lawPersonE.text());
+                "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^法定代表人|负责人$) + td").first();
+        if (lawPersonE != null) c.setLawPerson(lawPersonE.text());
         // 成立日期
         Element regDateE = doc.select(
                 "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^成立日期$) + td").first();
-        c.setRegDate(toDate(regDateE.text()));
+        if (regDateE != null) c.setRegDate(toDate(regDateE.text()));
         // 住所
         Element location = doc.select(
                 "table[class=detailsList]:eq(0) > tbody > tr >th:matches(所$) + td").first();
-        c.setLocation(location.text());
+        if (location != null) c.setLocation(location.text());
         // 经营范围
         Element business = doc.select(
                 "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^经营范围$) + td").first();
-        c.setBusiness(business.text());
+        if (business != null) c.setBusiness(business.text());
         // 股东/发起人，这里需要异步再次发起一次请求
         c.setStockholder(fetchInvestor(investorHtml));
         // 登记状态
         Element status = doc.select(
                 "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^登记状态$) + td").first();
-        String statuss = status.text();
-        c.setStatus(statuss);
-        if (!"存续".equals(statuss)) {
-            c.setResultType(2);  // 已经无效了
+        if (business != null) {
+            String statuss = status.text();
+            c.setStatus(statuss);
+            if (!"存续".equals(statuss)) {
+                c.setResultType(2);  // 已经无效了
+            }
         }
     }
 
