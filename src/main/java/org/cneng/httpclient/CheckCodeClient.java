@@ -300,7 +300,7 @@ public class CheckCodeClient {
             _log.info("responseBody=" + responseBody);
             int count = 1;
             while ("-3".equals(responseBody)) {
-                if (count++ > 100) {
+                if (count++ > 30) {
                     return null;
                 }
                 try {

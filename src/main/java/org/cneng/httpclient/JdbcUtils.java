@@ -85,13 +85,13 @@ public class JdbcUtils {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        String sqlText = "SELECT name, sid FROM t_idmap;";
+        String sqlText = "SELECT name, link FROM t_idmap;";
         try {
             conn = getConnection();
             ps = conn.prepareStatement(sqlText);
             rs = ps.executeQuery();
             while (rs.next()) {
-                map.put(rs.getString("name"), rs.getString("sid"));
+                map.put(rs.getString("name"), rs.getString("link"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -122,8 +122,8 @@ public class JdbcUtils {
         PreparedStatement ps2 = null;
         PreparedStatement ps3 = null;
         String selectSQL = "SELECT COUNT(*) FROM t_idmap WHERE name=?";
-        String insertSQL = "INSERT INTO t_idmap(name, sid) VALUES(?,?)";
-        String updateSQL = "UPDATE t_idmap SET sid=? WHERE name=?";
+        String insertSQL = "INSERT INTO t_idmap(name, link) VALUES(?,?)";
+        String updateSQL = "UPDATE t_idmap SET link=? WHERE name=?";
         try {
             conn = getConnection();
             Iterator<Map.Entry<String ,String>> iter = map.entrySet().iterator();
@@ -267,6 +267,44 @@ public class JdbcUtils {
             _log.info("----endCompany进程执行完成----");
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 更新重做表
+     * @param map
+     */
+    public static void endRedo(LinkedBlockingQueue<String> redoBug) {
+        Connection conn = null;
+        PreparedStatement ps1;
+        PreparedStatement ps2;
+        String deleteSQL = "DELETE FROM t_redo";
+        String insertSQL = "INSERT INTO t_redo(name) VALUES(?)";
+        try {
+            conn = getConnection();
+            ps1 = conn.prepareStatement(deleteSQL);
+            ps1.executeUpdate();
+            ps1.close();
+            while (!redoBug.isEmpty()) {
+                String n = redoBug.poll();
+                if (n != null) {
+                    ps2 = conn.prepareStatement(insertSQL);
+                    ps2.setString(1, n);
+                    ps2.executeUpdate();
+                    ps2.close();
+                }
+            }
+            _log.info("----更新重做表进程执行完成----");
+        } catch (Exception e) {
+            _log.error("更新重做表SQL错误", e);
         } finally {
             try {
                 if (conn != null) {

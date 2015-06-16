@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -40,6 +41,8 @@ import static org.cneng.httpclient.ConfigUtil.get;
  * @author XiongNeng
  * @version 1.0
  * @since 2015/2/3
+ *
+ *
  */
 public class QueryManager {
     private static final Logger _log = LoggerFactory.getLogger(QueryManager.class);
@@ -66,6 +69,8 @@ public class QueryManager {
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private LinkedBlockingQueue<Company> compQueue;
     private LinkedBlockingQueue<String> redoQueue;
+    private LinkedBlockingQueue<String> redoBug;
+    private Map<String, Integer> redoCount;
 
     private static final QueryManager instance = new QueryManager();
 
@@ -82,6 +87,8 @@ public class QueryManager {
         outdir = get("outdir");
         compQueue = new LinkedBlockingQueue<>();
         redoQueue = new LinkedBlockingQueue<>();
+        redoBug = new LinkedBlockingQueue<>();
+        redoCount = new ConcurrentHashMap<>();
     }
 
     /**
@@ -116,32 +123,33 @@ public class QueryManager {
      */
     public Company searchCompany(String keyword) {
         _log.info(sdf.format(new Date()));
-        Company result = new Company();
-        result.setCompanyName(keyword);
+        Company company = new Company();
+        company.setCompanyName(keyword);
         // 这一步是核心算法
         String[] dhtml = detailHtml(keyword);
-        String detailHtml = dhtml != null ? dhtml[0] : null;
-        result.setLink(dhtml != null ? dhtml[1] : null);
-        result.setResultType(1);  // 预设是正常的
-        try {
-            if (detailHtml != null) {
-                // 第八步：解析详情HTML页面，填充公司数据
-                // 这里我需要再去异步提交一个HTTP请求
-                // http://121.8.226.101:7001/search/search!entityShow?entityVo.pripid=440106106022010041200851
-                // http://121.8.226.101:7001/search/search!investorListShow?entityVo.pripid=440106106022010041200851
-                String link2 = result.getLink().replace("entityShow", "investorListShow");
-                String investorHtml = showDetail(link2, null)[0];
-                JSoupUtil.parseCompany(detailHtml, investorHtml, result);
-            } else {
-                // 说明不存在
-                result.setResultType(3);
-            }
-            // ---------------------------------------------------------------------------------
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        _log.info(sdf.format(new Date()));
-        return result;
+        // 下面搜索详情后面再做 todo
+//        String detailHtml = dhtml != null ? dhtml[0] : null;
+//        company.setLink(dhtml != null ? dhtml[1] : null);
+//        company.setResultType(1);  // 预设是正常的
+//        try {
+//            if (detailHtml != null) {
+//                // 第八步：解析详情HTML页面，填充公司数据
+//                // 这里我需要再去异步提交一个HTTP请求
+//                // http://121.8.226.101:7001/search/search!entityShow?entityVo.pripid=440106106022010041200851
+//                // http://121.8.226.101:7001/search/search!investorListShow?entityVo.pripid=440106106022010041200851
+//                String link2 = company.getLink().replace("entityShow", "investorListShow");
+//                String investorHtml = showDetail(link2, null)[0];
+//                JSoupUtil.parseCompany(detailHtml, investorHtml, company);
+//            } else {
+//                // 说明不存在
+//                company.setResultType(3);
+//            }
+//            // ---------------------------------------------------------------------------------
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        _log.info(sdf.format(new Date()));
+        return company;
     }
 
     /**
@@ -202,24 +210,25 @@ public class QueryManager {
     }
 
     /**
-     * 最后更新公司信息到数据库中
+     * 最后更新Redo表
      */
-    private void lastUpdateCompany() {
-        int threadCount = 6;
+    private void lastUpdateRedo() {
+        // 总线程数
+        int threadCount = 2;
         //障栅集合点(同步器)
         final CyclicBarrier barrier = new CyclicBarrier(threadCount + 1);
         ExecutorService executorService = Executors.newCachedThreadPool(
-                new NamedThreadPoolFactory("---更新公司信息---"));
-        _log.info("--------更新公司信息开始---------");
+                new NamedThreadPoolFactory("----更新Redo----"));
+        _log.info("--------更新Redo开始---------");
         for (int i = 0; i < threadCount - 1; i++) {
             executorService.execute(new Runnable() {
                 @Override
                 public void run() {
-                    JdbcUtils.endCompany(instance.compQueue);
+                    JdbcUtils.endRedo(redoBug);
                     try {
                         barrier.await();
                     } catch (Exception e) {
-                        _log.error("更新公司信息线程await出错...");
+                        _log.error("更新Redo线程await出错出错...");
                     }
                 }
             });
@@ -241,7 +250,7 @@ public class QueryManager {
             e.printStackTrace();
         }
         executorService.shutdown();
-        _log.info("--------更新公司信息结束---------");
+        _log.info("--------更新Redo结束---------");
     }
 
     /**
@@ -288,6 +297,49 @@ public class QueryManager {
         }
         executorService.shutdown();
         _log.info("--------更新IdMap结束---------");
+    }
+
+    /**
+     * 最后更新公司信息到数据库中
+     */
+    private void lastUpdateCompany() {
+        int threadCount = 6;
+        //障栅集合点(同步器)
+        final CyclicBarrier barrier = new CyclicBarrier(threadCount + 1);
+        ExecutorService executorService = Executors.newCachedThreadPool(
+                new NamedThreadPoolFactory("---更新公司信息---"));
+        _log.info("--------更新公司信息开始---------");
+        for (int i = 0; i < threadCount - 1; i++) {
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    JdbcUtils.endCompany(instance.compQueue);
+                    try {
+                        barrier.await();
+                    } catch (Exception e) {
+                        _log.error("更新公司信息线程await出错...");
+                    }
+                }
+            });
+        }
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    barrier.await();
+                } catch (Exception e) {
+                    _log.error("=============error=========${e}", e);
+                    e.printStackTrace();
+                }
+            }
+        });
+        try {
+            barrier.await();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        executorService.shutdown();
+        _log.info("--------更新公司信息结束---------");
     }
 
     private static class NamedThreadPoolFactory implements ThreadFactory {
@@ -346,17 +398,18 @@ public class QueryManager {
             if (Utils.idMap.containsKey(keyword)) {
                 link = Utils.idMap.get(keyword);
                 if (link == null) return null;
-                // 第七步：点击详情链接，获取详情HTML页面
-                result = showDetail(link, null);
+                // 第七步：点击详情链接，获取详情HTML页面 todo
+                // result = showDetail(link, null);
             } else {
                 // 第一步：访问首页获取sessionid
                 String jsessionid = fetchSessionId();
+                _log.info("----jsessionid=" + jsessionid);
                 // 第二步：先下载验证码图片到本地
                 String[] downloads = downloadVerifyPic(jsessionid);
                 // 第三步：获取验证码
                 String checkcode = CheckCodeClient.checkCode(downloads[0]);
                 if (checkcode == null) {
-                    redoQueue.put(keyword);
+                    redoQ(keyword);
                     return null;
                 }
                 // 这一步还得处理下验证码
@@ -370,28 +423,45 @@ public class QueryManager {
                     link = JSoupUtil.parseLink(searchPage);
                     // 把link存起来
                     if(StringUtil.isNotBlank(link)) {
+                        _log.info("----准备把link存到idmap中来：keyword=" + keyword + ", link=" + link);
                         Utils.updateIdMap(keyword, link);
-                        //Utils.idMap.put(keyword, link);
-                    } else {
-                        redoQueue.put(keyword);
                     }
                     if (link == null) return result;
-                    // 第七步：点击详情链接，获取详情HTML页面
-                    result = showDetail(link, jsessionid);
+                    // 第七步：点击详情链接，获取详情HTML页面 todo
+                    // result = showDetail(link, jsessionid);
                 } else {
                     _log.error("验证码未能正确识别, 重新查询：" + keyword);
-                    redoQueue.put(keyword);
+                    redoQ(keyword);
                 }
             }
         } catch (Exception e) {
             _log.error("通过关键字搜索企业error", e);
             try {
-                redoQueue.put(keyword);
+                redoQ(keyword);
             } catch (InterruptedException e1) {
                 _log.error("通过关键字搜索企业error->InterruptedException", e1);
             }
         }
         return result;
+    }
+
+    /**
+     * 程序入重做队列
+     */
+    private synchronized void redoQ(String key) throws InterruptedException {
+        if (redoCount.containsKey(key)) {
+            int c = redoCount.get(key);
+            if (c > 10) {
+                _log.info("重试次数超过了10次：" + key);
+                redoBug.put(key);
+                return;
+            } else {
+                redoCount.put(key, c + 1);
+            }
+        } else {
+            redoCount.put(key, 1);
+        }
+        redoQueue.put(key);
     }
 
     /**
@@ -581,6 +651,10 @@ public class QueryManager {
             httppost.addHeader("Accept-Encoding", "gzip,deflate");
             httppost.addHeader("Accept-Language", "zh-CN,zh;q=0.8,en;q=0.6");
             httppost.addHeader("Cookie", "JSESSIONID=" + jsessionid);
+            httppost.addHeader("Host", "gsxt.gdgs.gov.cn");
+            httppost.addHeader("Origin", "http://gsxt.gdgs.gov.cn");
+            httppost.addHeader("Pragma", "no-cache");
+            httppost.addHeader("Referer", "http://gsxt.gdgs.gov.cn/aiccips/CheckEntContext/showInfo.html");
 
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("textfield", textfield));
@@ -725,18 +799,25 @@ public class QueryManager {
         JdbcUtils.startCompany(instance.redoQueue);
         _log.info("第四步：线程池实现抓取动作");
         instance.produceCompany();
-        _log.info("第五步：等待所有线程执行完后更新idmap");
+        _log.info("第五步：执行完后更新idmap");
         new Thread(new Runnable() {
             @Override
             public void run() {
                 instance.lastUpdateIdMap();
             }
         }).start();
-        _log.info("第六步：更新公司信息");
+//        _log.info("第六步：执行完后更新公司信息");
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                instance.lastUpdateCompany();
+//            }
+//        }).start();
+        _log.info("第七步：执行完后更新Redo表");
         new Thread(new Runnable() {
             @Override
             public void run() {
-                instance.lastUpdateCompany();
+                instance.lastUpdateRedo();
             }
         }).start();
     }

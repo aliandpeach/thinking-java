@@ -264,21 +264,23 @@ public class Utils {
      * @return
      */
     public static String realCode(String checkCode) {
+        String result = checkCode;
         if (checkCode.endsWith("等于") && checkCode.length() == 5) {
             Integer a = numbers.get(checkCode.substring(0,1));
             String op = checkCode.substring(1,2);
             Integer b = numbers.get(checkCode.substring(2,3));
             if ("加".equals(op)) {
-                return String.valueOf(a + b);
+                result = String.valueOf(a + b);
             } else if ("减".equals(op)) {
-                return String.valueOf(a - b);
+                result = String.valueOf(a - b);
             } else if ("乘".equals(op)) {
-                return String.valueOf(a * b);
+                result = String.valueOf(a * b);
             } else {
-                return String.valueOf(a / b);
+                result = String.valueOf(a / b);
             }
         }
-        return checkCode;
+        _log.info("----最终的验证码结果：" + checkCode);
+        return result;
     }
     private static final Map<String, Integer> numbers = new HashMap<String, Integer>(){{
         put("零",0);
