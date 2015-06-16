@@ -124,7 +124,7 @@ public class CheckCodeClient {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpGet httpget = new HttpGet(model.getFlushServer());
-            _log.info("Executing request " + httpget.getRequestLine());
+            //_log.info("Executing request " + httpget.getRequestLine());
             // 所有请求的通用header：
             httpget.addHeader("SID", model.getSwId());
             httpget.addHeader("HASH", Md5(model.getSwId() + model.getSwKeyUpper()));
@@ -148,8 +148,8 @@ public class CheckCodeClient {
 
             };
             String responseBody = httpclient.execute(httpget, responseHandler);
-            _log.info("----------------------------------------");
-            _log.info(responseBody);
+            //_log.info("----------------------------------------");
+            //_log.info("responseBody=" + responseBody);
             return parseServers(responseBody);
         } finally {
             httpclient.close();
@@ -163,7 +163,7 @@ public class CheckCodeClient {
             HttpGet httpget = new HttpGet(
                     "http://" + model.getLoginServer() + "/Upload/UULogin.aspx?U="
                             + model.getUname() + "&p=" + model.getPwmd5());
-            _log.info("Executing request " + httpget.getRequestLine());
+            //_log.info("Executing request " + httpget.getRequestLine());
 
             // 所有请求的通用header：
             httpget.addHeader("SID", model.getSwId());
@@ -190,8 +190,8 @@ public class CheckCodeClient {
                 }
             };
             String responseBody = httpclient.execute(httpget, responseHandler);
-            _log.info("----------------------------------------");
-            _log.info(responseBody);
+            //_log.info("----------------------------------------");
+            //_log.info(responseBody);
             return new String[]{responseBody.split("_")[0], responseBody};
         } finally {
             httpclient.close();
@@ -209,7 +209,7 @@ public class CheckCodeClient {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpPost httppost = new HttpPost("http://" + model.getUploadServer() + "/Upload/Processing.aspx");
-            _log.info("Executing request " + httppost.getRequestLine());
+            //_log.info("Executing request " + httppost.getRequestLine());
 
             // 所有请求的通用header：
             httppost.addHeader("SID", model.getSwId());
@@ -254,8 +254,8 @@ public class CheckCodeClient {
                 }
             };
             String responseBody = httpclient.execute(httppost, responseHandler);
-            _log.info("----------------------------------------");
-            _log.info(responseBody);
+            //_log.info("----------------------------------------");
+            _log.info("upload response=" + responseBody);
             return responseBody;
         } finally {
             httpclient.close();
@@ -274,7 +274,7 @@ public class CheckCodeClient {
         try {
             HttpGet httpget = new HttpGet("http://" + model.getResultServer() +
                     "/Upload/GetResult.aspx?key=" + model.getUserKey() + "&ID=" + checkId);
-            _log.info("Executing request " + httpget.getRequestLine());
+            //_log.info("Executing request " + httpget.getRequestLine());
 
             // 所有请求的通用header：
             httpget.addHeader("SID", model.getSwId());
@@ -297,7 +297,7 @@ public class CheckCodeClient {
                 }
             };
             String responseBody = httpclient.execute(httpget, responseHandler);
-            _log.info("responseBody=" + responseBody);
+            _log.info("getResult responseBody=" + responseBody);
             int count = 1;
             while ("-3".equals(responseBody)) {
                 if (count++ > 30) {
@@ -311,7 +311,7 @@ public class CheckCodeClient {
                     e.printStackTrace();
                 }
             }
-            _log.info("----------------------------------------");
+            //_log.info("----------------------------------------");
             _log.info("验证码识别结果：" + responseBody);
             return responseBody;
         } finally {

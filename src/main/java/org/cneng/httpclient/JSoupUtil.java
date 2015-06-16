@@ -34,7 +34,7 @@ public class JSoupUtil {
         Elements content = doc.getElementsByAttributeValue("class", "font16");
         if (content.size() > 0) {
             Element e = content.get(0);
-            _log.info("获取链接href=" + e.child(0).attr("href"));
+            // _log.info("获取链接href=" + e.child(0).attr("href"));
             return e.child(0).attr("href");
         }
         return null;

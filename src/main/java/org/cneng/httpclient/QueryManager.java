@@ -480,7 +480,7 @@ public class QueryManager {
                 setDefaultRequestConfig(globalConfig).setDefaultCookieStore(cookieStore).build();
         try {
             HttpGet httpget = new HttpGet(homepageUrl);
-            _log.info("Executing request " + httpget.getRequestLine());
+            //_log.info("Executing request " + httpget.getRequestLine());
             // 所有请求的通用header：
             httpget.addHeader("User-Agent",
                     "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:33.0) Gecko/20100101 Firefox/33.0");
@@ -505,8 +505,8 @@ public class QueryManager {
             List<Cookie> cookies = context.getCookieStore().getCookies();
             for (Cookie cookie : cookies) {
                 if ("JSESSIONID".equals(cookie.getName())) {
-                    _log.info(cookie.getName() + ":" + cookie.getValue());
-                    _log.info("******************************");
+                    //_log.info(cookie.getName() + ":" + cookie.getValue());
+                    //_log.info("******************************");
                     return cookie.getValue();
                 }
             }
@@ -526,7 +526,7 @@ public class QueryManager {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpGet httpget = new HttpGet(verifyPicUrl + "?random=" + Math.random());
-            _log.info("Executing request " + httpget.getRequestLine());
+            // _log.info("Executing request " + httpget.getRequestLine());
             // 所有请求的通用header：
             httpget.addHeader("Accept", "image/png,image/*;q=0.8,*/*;q=0.5");
             httpget.addHeader("Cookie", "JSESSIONID=" + jsessionId);
@@ -619,8 +619,8 @@ public class QueryManager {
                 }
             };
             String responseBody = httpclient.execute(httppost, responseHandler);
-            _log.info("----------------------------------------");
-            _log.info(responseBody);
+            //_log.info("----------------------------------------");
+            //_log.info(responseBody);
             return JSON.parseObject(responseBody, CheckCodeResult.class);
         } finally {
             httpclient.close();
@@ -640,7 +640,7 @@ public class QueryManager {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpPost httppost = new HttpPost(showInfoUrl);
-            _log.info("Executing request " + httppost.getRequestLine());
+            // _log.info("Executing request " + httppost.getRequestLine());
 
             // 所有请求的通用header：
             httppost.addHeader("Accept",
@@ -677,7 +677,7 @@ public class QueryManager {
                 }
             };
             String responseBody = httpclient.execute(httppost, responseHandler);
-            _log.info("----------------------------------------");
+            // _log.info("----------------------------------------");
             return responseBody;
         } finally {
             httpclient.close();
@@ -696,7 +696,7 @@ public class QueryManager {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpGet httpget = new HttpGet(detailUrl);
-            _log.info("Executing request " + httpget.getRequestLine());
+            // _log.info("Executing request " + httpget.getRequestLine());
 
             // 所有请求的通用header：
             httpget.addHeader("Accept",
@@ -721,7 +721,7 @@ public class QueryManager {
                 }
             };
             String responseBody = httpclient.execute(httpget, responseHandler);
-            _log.info("----------------------------------------");
+            // _log.info("----------------------------------------");
             return new String[]{responseBody, detailUrl};
         } finally {
             httpclient.close();
@@ -795,8 +795,8 @@ public class QueryManager {
                 "D:/work/projects/gitprojects/thinking-java/src/main/resources/names.txt");
         _log.info("第二步：初始化idmap");
         JdbcUtils.startIdMap(Utils.idMap);
-        _log.info("第三步：初始化公司表");
-        JdbcUtils.startCompany(instance.redoQueue);
+//        _log.info("第三步：初始化公司表");
+//        JdbcUtils.startCompany(instance.redoQueue);
         _log.info("第四步：线程池实现抓取动作");
         instance.produceCompany();
         _log.info("第五步：执行完后更新idmap");
