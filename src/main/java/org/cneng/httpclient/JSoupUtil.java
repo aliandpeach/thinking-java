@@ -30,6 +30,7 @@ public class JSoupUtil {
      * @throws Exception
      */
     public static String parseLink(String htmlContent) throws Exception {
+        // _log.info(htmlContent);
         Document doc = Jsoup.parse(htmlContent);
         Elements content = doc.getElementsByAttributeValue("class", "font16");
         if (content.size() > 0) {
@@ -72,7 +73,7 @@ public class JSoupUtil {
         if (taxnoE != null) c.setTaxno(taxnoE.text());
         // 法定代表人
         Element lawPersonE = doc.select(
-                "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^法定代表人|负责人$) + td").first();
+                "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^法定代表人|负责人|投资人$) + td").first();
         if (lawPersonE != null) c.setLawPerson(lawPersonE.text());
         // 成立日期
         Element regDateE = doc.select(

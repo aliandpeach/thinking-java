@@ -48,7 +48,7 @@ public class Utils {
     public static final Map<String, String> idMap = new ConcurrentHashMap<>();
     public static final LinkedBlockingQueue<String[]> idMapQueue = new LinkedBlockingQueue<>();
 
-    public static void updateIdMapQueue() {
+    public static synchronized void updateIdMapQueue() {
         for (String k : idMap.keySet()) {
             try {
                 idMapQueue.put(new String[]{k, idMap.get(k)});
@@ -279,7 +279,7 @@ public class Utils {
                 result = String.valueOf(a / b);
             }
         }
-        _log.info("----最终的验证码结果：" + checkCode);
+        _log.info("----最终的验证码结果：" + result);
         return result;
     }
     private static final Map<String, Integer> numbers = new HashMap<String, Integer>(){{
@@ -297,7 +297,7 @@ public class Utils {
 
     public static void main(String[] args) throws Exception {
         //downloadPic("D:/work/zpics/", "http://gsxt.gdgs.gov.cn/aiccips/verify.html");
-        System.out.println(realCode("伍乘捌等于"));
+        System.out.println(realCode("肆加壹等于"));
     }
 
 }

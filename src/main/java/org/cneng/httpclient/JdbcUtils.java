@@ -10,6 +10,9 @@ import java.sql.*;
 import java.sql.Date;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created with IntelliJ IDEA.
@@ -81,7 +84,7 @@ public class JdbcUtils {
      * 初始化IDMAP
      * @param map
      */
-    public static void startIdMap(Map<String, String> map) {
+    public static synchronized void startIdMap(Map<String, String> map) {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -112,11 +115,12 @@ public class JdbcUtils {
         }
     }
 
+    private static final Lock idmLock = new ReentrantLock();
     /**
      * 更新IDMAP
      * @param map
      */
-    public static void endIdMap(Map<String, String> map) {
+    public static void endIdMap(LinkedBlockingQueue<String[]> idMapQueue) {
         Connection conn = null;
         PreparedStatement ps1 = null;
         PreparedStatement ps2 = null;
@@ -126,12 +130,18 @@ public class JdbcUtils {
         String updateSQL = "UPDATE t_idmap SET link=? WHERE name=?";
         try {
             conn = getConnection();
-            Iterator<Map.Entry<String ,String>> iter = map.entrySet().iterator();
-            while (iter.hasNext()) {
-                Map.Entry<String ,String> each = iter.next();
-                iter.remove();
-                String k = each.getKey();
-                String v = each.getValue();
+            while(true) {
+                String[] idm = null;
+                if (idmLock.tryLock()) {
+                    try {
+                        idm = idMapQueue.poll();;
+                    } finally {
+                        idmLock.unlock();
+                    }
+                }
+                if (idm == null) break;
+                String k = idm[0];
+                String v = idm[1];
                 ps1 = conn.prepareStatement(selectSQL);
                 ps1.setString(1, k);
                 int count = 0;
@@ -195,7 +205,9 @@ public class JdbcUtils {
             PreparedStatement ps1 = conn.prepareStatement(clearSQL);
             ps1.executeUpdate();
             ps1.close();
-            for (String k : redoQueue) {
+            while (true) {
+                String k = redoQueue.poll();
+                if (k == null) break;
                 PreparedStatement ps2 = conn.prepareStatement(insertSQL);
                 ps2.setString(1, k);
                 ps2.executeUpdate();
@@ -214,12 +226,30 @@ public class JdbcUtils {
         }
     }
 
+    private static final Lock clock = new ReentrantLock();
     /**
      * 更新公司表
      * @param map
      */
     public static void endCompany(LinkedBlockingQueue<Company> compQueue) {
         Connection conn = null;
+        String selectSQL = "SELECT id FROM t_scompany WHERE company_name=? LIMIT 1";
+        String insertSQL = "INSERT INTO t_scompany(" +
+                "result_type" +
+                ",taxno" +
+                ",law_person" +
+                ",reg_date" +
+                ",location" +
+                ",business" +
+                ",stockholder" +
+                ",detail" +
+                ",illegal" +
+                ",penalty" +
+                ",exception" +
+                ",status" +
+                ",link" +
+                ",company_name)" +
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         String updateSQL = "UPDATE t_scompany SET " +
                 "result_type=?" +
                 ",taxno=?" +
@@ -239,30 +269,71 @@ public class JdbcUtils {
             conn = getConnection();
             //队列方式遍历，元素逐个被移除
             while (true) {
-                Company c = compQueue.poll();
-                if (c == null) break;
-                PreparedStatement ps2 = conn.prepareStatement(updateSQL);
-                ps2.setInt(1, c.getResultType());
-                ps2.setString(2, c.getTaxno());
-                ps2.setString(3, c.getLawPerson());
-                if (c.getRegDate() != null) {
-                    ps2.setDate(4, new java.sql.Date(c.getRegDate().getTime()));
-                } else {
-                    ps2.setDate(4, null);
+                Company c =null;
+                if (clock.tryLock()) {
+                    try {
+                        c = compQueue.poll();
+                    } finally {
+                        clock.unlock();
+                    }
                 }
-                ps2.setString(5, c.getLocation());
-                ps2.setString(6, c.getBusiness());
-                ps2.setString(7, c.getStockholder());
-                ps2.setString(8, c.getDetail());
-                ps2.setString(9, c.getIllegal());
-                ps2.setString(10, c.getPenalty());
-                ps2.setString(11, c.getException());
-                ps2.setString(12, c.getStatus());
-                ps2.setString(13, c.getLink());
-                ps2.setString(14, c.getCompanyName());
+                if (c == null) break;
+                PreparedStatement ps1 = conn.prepareStatement(selectSQL);
+                ps1.setString(1, c.getCompanyName());
+                ResultSet rs1 = ps1.executeQuery();
+                long cid = -1L;
+                if (rs1.next()) {
+                    cid = rs1.getLong(1);
+                }
+                rs1.close();
+                if (cid == -1L) {
+                    PreparedStatement ps11 = conn.prepareStatement(insertSQL);
+                    ps11.setInt(1, c.getResultType());
+                    ps11.setString(2, c.getTaxno());
+                    ps11.setString(3, c.getLawPerson());
+                    if (c.getRegDate() != null) {
+                        ps11.setDate(4, new java.sql.Date(c.getRegDate().getTime()));
+                    } else {
+                        ps11.setDate(4, null);
+                    }
+                    ps11.setString(5, c.getLocation());
+                    ps11.setString(6, c.getBusiness());
+                    ps11.setString(7, c.getStockholder());
+                    ps11.setString(8, c.getDetail());
+                    ps11.setString(9, c.getIllegal());
+                    ps11.setString(10, c.getPenalty());
+                    ps11.setString(11, c.getException());
+                    ps11.setString(12, c.getStatus());
+                    ps11.setString(13, c.getLink());
+                    ps11.setString(14, c.getCompanyName());
 
-                ps2.executeUpdate();
-                ps2.close();
+                    ps11.executeUpdate();
+                    ps11.close();
+                } else {
+                    PreparedStatement ps2 = conn.prepareStatement(updateSQL);
+                    ps2.setInt(1, c.getResultType());
+                    ps2.setString(2, c.getTaxno());
+                    ps2.setString(3, c.getLawPerson());
+                    if (c.getRegDate() != null) {
+                        ps2.setDate(4, new java.sql.Date(c.getRegDate().getTime()));
+                    } else {
+                        ps2.setDate(4, null);
+                    }
+                    ps2.setString(5, c.getLocation());
+                    ps2.setString(6, c.getBusiness());
+                    ps2.setString(7, c.getStockholder());
+                    ps2.setString(8, c.getDetail());
+                    ps2.setString(9, c.getIllegal());
+                    ps2.setString(10, c.getPenalty());
+                    ps2.setString(11, c.getException());
+                    ps2.setString(12, c.getStatus());
+                    ps2.setString(13, c.getLink());
+                    ps2.setString(14, c.getCompanyName());
+
+                    ps2.executeUpdate();
+                    ps2.close();
+                }
+
             }
             _log.info("----endCompany进程执行完成----");
         } catch (Exception e) {
@@ -293,14 +364,13 @@ public class JdbcUtils {
             ps1 = conn.prepareStatement(deleteSQL);
             ps1.executeUpdate();
             ps1.close();
-            while (!redoBug.isEmpty()) {
+            while (true) {
                 String n = redoBug.poll();
-                if (n != null) {
-                    ps2 = conn.prepareStatement(insertSQL);
-                    ps2.setString(1, n);
-                    ps2.executeUpdate();
-                    ps2.close();
-                }
+                if (n == null) break;
+                ps2 = conn.prepareStatement(insertSQL);
+                ps2.setString(1, n);
+                ps2.executeUpdate();
+                ps2.close();
             }
             _log.info("----更新重做表进程执行完成----");
         } catch (Exception e) {
