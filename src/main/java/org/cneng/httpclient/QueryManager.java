@@ -148,7 +148,12 @@ public class QueryManager {
             }
             // ---------------------------------------------------------------------------------
         } catch (Exception e) {
-            e.printStackTrace();
+            _log.error("通过关键字搜索企业error" + keyword);
+            try {
+                redoQ(keyword);
+            } catch (InterruptedException e1) {
+                _log.error("通过关键字搜索企业error->InterruptedException");
+            }
         }
         _log.info(sdf.format(new Date()));
         return company;
@@ -159,7 +164,7 @@ public class QueryManager {
      * 根据redo队列中的企业名称去爬取公司信息，向队列中放置公司信息
      */
     private void produceCompany() {
-        int threadCount = 6;
+        int threadCount = 10;
         //障栅集合点(同步器)
         final CyclicBarrier barrier = new CyclicBarrier(threadCount + 1);
         ExecutorService executorService = Executors.newCachedThreadPool(
@@ -477,11 +482,11 @@ public class QueryManager {
                 }
             }
         } catch (Exception e) {
-            _log.error("通过关键字搜索企业error", e);
+            _log.error("通过关键字搜索企业error: " + keyword);
             try {
                 redoQ(keyword);
             } catch (InterruptedException e1) {
-                _log.error("通过关键字搜索企业error->InterruptedException", e1);
+                _log.error("通过关键字搜索企业error->InterruptedException");
             }
         }
         return result;
@@ -494,7 +499,7 @@ public class QueryManager {
         if (redoCount.containsKey(key)) {
             int c = redoCount.get(key);
             if (c > 3) {
-                _log.info("重试次数超过了3次：" + key);
+                _log.error("重试次数超过了3次：" + key);
                 redoBug.put(key);
                 return;
             } else {
