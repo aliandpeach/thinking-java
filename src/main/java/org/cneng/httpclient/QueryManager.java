@@ -467,7 +467,7 @@ public class QueryManager {
                         link = JSoupUtil.parseLink(searchPage);
                         _log.info("我找到的列表页面的第一个链接：" + link);
                         // 把link存起来
-                        _log.info("----准备把link存到idmap中来：keyword=" + keyword + ", link=" + link);
+                        _log.error("keyword=" + keyword + ", link=" + link);
                         if (StringUtil.isBlank(link)) {
                             return result;
                         } else {
