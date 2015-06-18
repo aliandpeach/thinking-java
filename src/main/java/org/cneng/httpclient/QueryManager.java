@@ -43,8 +43,6 @@ import static org.cneng.httpclient.ConfigUtil.get;
  * @author XiongNeng
  * @version 1.0
  * @since 2015/2/3
- *
- *
  */
 public class QueryManager {
     private static final Logger _log = LoggerFactory.getLogger(QueryManager.class);
@@ -150,6 +148,7 @@ public class QueryManager {
         } catch (Exception e) {
             _log.error("通过关键字搜索企业error: " + keyword, e);
             try {
+                _log.error("通过关键字搜索企业error: " + keyword + ", redoQ");
                 redoQ(keyword);
             } catch (InterruptedException e1) {
                 _log.error("通过关键字搜索企业error->InterruptedException");
@@ -160,6 +159,7 @@ public class QueryManager {
     }
 
     private static final Lock lockCompany = new ReentrantLock();
+
     /**
      * 根据redo队列中的企业名称去爬取公司信息，向队列中放置公司信息
      */
@@ -438,7 +438,7 @@ public class QueryManager {
                 link = Utils.idMap.get(keyword);
                 if (StringUtil.isBlank(link)) return result;
                 // 第七步：点击详情链接，获取详情HTML页面
-                 result = showDetail(link, null);
+                result = showDetail(link, null);
             } else {
                 _log.info(keyword + " - 的link要去爬取----");
                 // 第一步：访问首页获取sessionid
@@ -460,7 +460,7 @@ public class QueryManager {
                 if ("1".equals(checkCodeResult.getFlag())) {
                     String searchPage = showInfo(checkCodeResult.getTextfield(), checkcode, jsessionid);
                     // 第六步：解析出第一条链接地址
-                    if(searchPage.contains("验证码不正确或已失效")) {
+                    if (searchPage.contains("验证码不正确或已失效")) {
                         _log.info("验证码不正确或已失效, 重新查询：" + keyword);
                         redoQ(keyword);
                     } else {
@@ -469,6 +469,10 @@ public class QueryManager {
                         // 把link存起来
                         _log.error("keyword=" + keyword + ", link=" + link);
                         if (StringUtil.isBlank(link)) {
+                            redoQ(keyword);
+                            return result;
+                        } else if ("404".equals(link)) {
+                            Utils.updateIdMap(keyword, "");
                             return result;
                         } else {
                             Utils.updateIdMap(keyword, link);
@@ -492,23 +496,31 @@ public class QueryManager {
         return result;
     }
 
+    private static Lock lllock = new ReentrantLock();
+
     /**
      * 程序入重做队列
      */
-    private synchronized void redoQ(String key) throws InterruptedException {
-        if (redoCount.containsKey(key)) {
-            int c = redoCount.get(key);
-            if (c > 3) {
-                _log.error("重试次数超过了3次：" + key);
-                redoBug.put(key);
-                return;
-            } else {
-                redoCount.put(key, c + 1);
+    private void redoQ(String key) throws InterruptedException {
+        if (lllock.tryLock()) {
+            try {
+                if (redoCount.containsKey(key)) {
+                    int c = redoCount.get(key);
+                    if (c > 3) {
+                        _log.error("重试次数超过了3次：" + key);
+                        redoBug.put(key);
+                        return;
+                    } else {
+                        redoCount.put(key, c + 1);
+                    }
+                } else {
+                    redoCount.put(key, 1);
+                }
+                redoQueue.put(key);
+            } finally {
+                lllock.unlock();
             }
-        } else {
-            redoCount.put(key, 1);
         }
-        redoQueue.put(key);
     }
 
     /**

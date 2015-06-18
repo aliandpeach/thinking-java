@@ -32,6 +32,10 @@ public class JSoupUtil {
     public static String parseLink(String htmlContent) throws Exception {
         // _log.info(htmlContent);
         String result = null;
+        if (htmlContent == null) return null;
+        if (htmlContent.contains("暂未查询到相关记录")) {
+            return "404";
+        }
         Document doc = Jsoup.parse(htmlContent);
         Elements content = doc.getElementsByAttributeValue("class", "font16");
         if (content.size() > 0) {
@@ -78,11 +82,11 @@ public class JSoupUtil {
         if (taxnoE != null) c.setTaxno(taxnoE.text());
         // 法定代表人
         Element lawPersonE = doc.select(
-                "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^法定代表人|负责人|投资人$) + td").first();
+                "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^法定代表人|负责人|投资人|经营者$) + td").first();
         if (lawPersonE != null) c.setLawPerson(lawPersonE.text());
         // 成立日期
         Element regDateE = doc.select(
-                "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^成立日期$) + td").first();
+                "table[class=detailsList]:eq(0) > tbody > tr >th:matches(^成立日期|注册日期$) + td").first();
         if (regDateE != null) c.setRegDate(toDate(regDateE.text()));
         // 住所
         Element location = doc.select(
@@ -107,6 +111,7 @@ public class JSoupUtil {
     }
 
     private static String fetchInvestor(String investorHtml) {
+        if (StringUtil.isBlank(investorHtml)) return null;
         if (investorHtml.contains("<html") && investorHtml.contains("touziren")) {
             Document doc = Jsoup.parse(investorHtml);
             // 股东/发起人
