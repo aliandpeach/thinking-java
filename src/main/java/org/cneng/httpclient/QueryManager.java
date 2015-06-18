@@ -148,7 +148,7 @@ public class QueryManager {
             }
             // ---------------------------------------------------------------------------------
         } catch (Exception e) {
-            _log.error("通过关键字搜索企业error" + keyword);
+            _log.error("通过关键字搜索企业error: " + keyword, e);
             try {
                 redoQ(keyword);
             } catch (InterruptedException e1) {
@@ -461,7 +461,7 @@ public class QueryManager {
                     String searchPage = showInfo(checkCodeResult.getTextfield(), checkcode, jsessionid);
                     // 第六步：解析出第一条链接地址
                     if(searchPage.contains("验证码不正确或已失效")) {
-                        _log.error("验证码不正确或已失效, 重新查询：" + keyword);
+                        _log.info("验证码不正确或已失效, 重新查询：" + keyword);
                         redoQ(keyword);
                     } else {
                         link = JSoupUtil.parseLink(searchPage);
@@ -477,12 +477,12 @@ public class QueryManager {
                         }
                     }
                 } else {
-                    _log.error("验证码未能正确识别, 重新查询：" + keyword);
+                    _log.info("验证码未能正确识别, 重新查询：" + keyword);
                     redoQ(keyword);
                 }
             }
         } catch (Exception e) {
-            _log.error("通过关键字搜索企业error: " + keyword);
+            _log.error("通过关键字搜索企业error: " + keyword, e);
             try {
                 redoQ(keyword);
             } catch (InterruptedException e1) {
@@ -870,5 +870,14 @@ public class QueryManager {
                 instance.lastUpdateRedo();
             }
         }).start();
+    }
+
+    /**
+     * Gets 首页地址.
+     *
+     * @return Value of 首页地址.
+     */
+    public String getHomepageUrl() {
+        return homepageUrl;
     }
 }

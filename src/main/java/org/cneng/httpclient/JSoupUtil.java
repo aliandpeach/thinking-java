@@ -31,14 +31,19 @@ public class JSoupUtil {
      */
     public static String parseLink(String htmlContent) throws Exception {
         // _log.info(htmlContent);
+        String result = null;
         Document doc = Jsoup.parse(htmlContent);
         Elements content = doc.getElementsByAttributeValue("class", "font16");
         if (content.size() > 0) {
             Element e = content.get(0);
             // _log.info("获取链接href=" + e.child(0).attr("href"));
-            return e.child(0).attr("href");
+            result = e.child(0).attr("href");
+            if (!result.startsWith("http://")) {
+                _log.info("获取的相对链接href=" + result);
+                result = QueryManager.getInstance().getHomepageUrl() + result.substring(3);
+            }
         }
-        return null;
+        return result;
     }
 
     /**
@@ -102,6 +107,21 @@ public class JSoupUtil {
     }
 
     private static String fetchInvestor(String investorHtml) {
+        if (investorHtml.contains("<html") && investorHtml.contains("touziren")) {
+            Document doc = Jsoup.parse(investorHtml);
+            // 股东/发起人
+            Elements nameE = doc.select("table#touziren tr >td:eq(1)");
+            if (nameE != null && nameE.size() > 0) {
+                StringBuilder sbb = new StringBuilder();
+                for (Element e : nameE) {
+                    sbb.append(e.text()).append("/");
+                }
+                String sbb1 = sbb.toString();
+                return sbb1.substring(0, sbb1.length() - 1);
+            } else {
+                return "";
+            }
+        }
         JSONObject root = JSON.parseObject(investorHtml);
         JSONArray array = root.getJSONArray("investorList");
         StringBuilder sb = new StringBuilder();
@@ -131,6 +151,43 @@ public class JSoupUtil {
 //    }
 
     public static void main(String[] args) throws Exception{
+        String investorHtml = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" +
+                "<html xmlns=\"http://www.w3.org/1999/xhtml\">" +
+                "<table  cellpadding=\"0\" cellspacing=\"0\" class=\"detailsList\" id=\"touziren\" style=\"\" >\n" +
+                "           <tr>\n" +
+                "               <td width=\"20%\" style=\"text-align:center;\">自然人股东</td>\n" +
+                "               <td width=\"20%\" style=\"text-align:center;\">李芳生</td>\n" +
+                "               <td width=\"25%\" style=\"text-align:center;\"></td>\n" +
+                "               <td width=\"25%\" style=\"text-align:center;\">不公示</td>\n" +
+                "               <td width=\"10%\" style=\"text-align:center;\">\n" +
+                "                        <a href=\"#\" onclick=\"return alert('该公司的股东及出资信息在2014年3月1日后发生变化的,股东详情企业自主公示');\">详情</a>\n" +
+                "                </td>\n" +
+                "            </tr>\n" +
+                "           <tr>\n" +
+                "               <td width=\"20%\" style=\"text-align:center;\">自然人股东</td>\n" +
+                "               <td width=\"20%\" style=\"text-align:center;\">李晓毅</td>\n" +
+                "               <td width=\"25%\" style=\"text-align:center;\"></td>\n" +
+                "               <td width=\"25%\" style=\"text-align:center;\">不公示</td>\n" +
+                "               <td width=\"10%\" style=\"text-align:center;\">\n" +
+                "                        <a href=\"#\" onclick=\"return alert('该公司的股东及出资信息在2014年3月1日后发生变化的,股东详情企业自主公示');\">详情</a>\n" +
+                "                </td>\n" +
+                "            </tr>\n" +
+                "    </table>\n" +
+                "</html>";
+        // todo
+        if (investorHtml.contains("<html") && investorHtml.contains("touziren")) {
+            Document doc = Jsoup.parse(investorHtml);
+            // 股东/发起人
+            Elements nameE = doc.select("table#touziren tr >td:eq(1)");
+            if (nameE != null && nameE.size() > 0) {
+                StringBuilder sbb = new StringBuilder();
+                for (Element e : nameE) {
+                    sbb.append(e.text()).append("/");
+                }
+                String sbb1 = sbb.toString();
+                System.out.println(sbb1.substring(0, sbb1.length() - 1));
+            }
+        }
 //        DataInputStream dis = new DataInputStream(new FileInputStream(
 //                "D:\\work\\projects\\thinking-java\\src\\main\\resources\\test.html"));
 //        byte[] datainBytes = new byte[dis.available()];
