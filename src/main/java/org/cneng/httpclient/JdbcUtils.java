@@ -118,6 +118,76 @@ public class JdbcUtils {
         }
     }
 
+    /**
+     * 获取公司列表
+     * @param idmap
+     */
+    public static List<Company> selectCompanys() {
+        List<Company> companies = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlText = "SELECT " +
+                "result_type" +
+                ",company_name" +
+                ",taxno" +
+                ",law_person" +
+                ",reg_date" +
+                ",location" +
+                ",business" +
+                ",stockholder" +
+                ",detail" +
+                ",illegal" +
+                ",penalty" +
+                ",exception" +
+                ",status" +
+                ",link " +
+                "FROM t_scompany";
+        try {
+            conn = getConnection();
+            ps = conn.prepareStatement(sqlText);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                Company c = new Company();
+                c.setResultType(rs.getInt(1));
+                c.setCompanyName(rs.getString(2));
+                c.setTaxno(rs.getString(3));
+                c.setLawPerson(rs.getString(4));
+                java.sql.Date rd = rs.getDate(5);
+                if (rd != null) {
+                    c.setRegDate(new java.util.Date(rs.getDate(5).getTime()));
+                }
+                c.setLocation(rs.getString(6));
+                c.setBusiness(rs.getString(7));
+                c.setStockholder(rs.getString(8));
+                c.setDetail(rs.getString(9));
+                c.setIllegal(rs.getString(10));
+                c.setPenalty(rs.getString(11));
+                c.setException(rs.getString(12));
+                c.setStatus(rs.getString(13));
+                c.setLink(rs.getString(14));
+                companies.add(c);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return companies;
+    }
+
     private static final Lock idmLock = new ReentrantLock();
     /**
      * 更新IDMAP

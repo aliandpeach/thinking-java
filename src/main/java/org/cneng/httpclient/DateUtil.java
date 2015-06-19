@@ -22,4 +22,8 @@ public class DateUtil {
             return null;
         }
     }
+
+    public static String toStr(Date d) {
+        return d == null ? "" : df1.format(d);
+    }
 }
