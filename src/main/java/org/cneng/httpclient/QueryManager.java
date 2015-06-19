@@ -2,10 +2,7 @@ package org.cneng.httpclient;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -141,8 +138,10 @@ public class QueryManager {
                 String investorHtml = showDetail(link2, null)[0];
                 JSoupUtil.parseCompany(detailHtml, investorHtml, company);
             } else {
-                // 说明不存在
-                company.setResultType(3);
+                if ("404".equals(company.getLink())) {
+                    // 说明不存在
+                    company.setResultType(3);
+                }
             }
             // ---------------------------------------------------------------------------------
         } catch (Exception e) {
@@ -434,9 +433,10 @@ public class QueryManager {
         String[] result = new String[2];
         try {
             String link;
-            if (Utils.idMap.containsKey(keyword)) {
+            if (Utils.idMap.containsKey(keyword)
+                    && StringUtil.isNotBlank(Utils.idMap.get(keyword))) {
                 link = Utils.idMap.get(keyword);
-                if (StringUtil.isBlank(link)) return result;
+                //if (StringUtil.isBlank(link)) return result;
                 // 第七步：点击详情链接，获取详情HTML页面
                 result = showDetail(link, null);
             } else {
@@ -472,7 +472,9 @@ public class QueryManager {
                             redoQ(keyword);
                             return result;
                         } else if ("404".equals(link)) {
+                            _log.error("哈哈，这个是个404企业：" + keyword);
                             Utils.updateIdMap(keyword, "");
+                            result[1] = "404";
                             return result;
                         } else {
                             Utils.updateIdMap(keyword, link);
@@ -856,7 +858,9 @@ public class QueryManager {
         instance.initRedo(
                 "D:/work/projects/gitprojects/thinking-java/src/main/resources/names.txt");
         _log.info("第二步：初始化idmap");
-        JdbcUtils.startIdMap(Utils.idMap);
+        Set<String> rSet = new HashSet<>();
+        rSet.addAll(instance.redoQueue);
+        JdbcUtils.startIdMap(Utils.idMap, rSet);
 //        _log.info("第三步：初始化公司表");
 //        JdbcUtils.startCompany(instance.redoQueue);
         _log.info("第四步：线程池实现抓取动作");

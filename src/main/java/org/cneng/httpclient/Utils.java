@@ -71,9 +71,7 @@ public class Utils {
     }
 
     public static synchronized void updateIdMap(String key, String link) {
-        if (!idMap.containsKey(key)) {
-            idMap.put(key, link);
-        }
+        idMap.put(key, link);
     }
 
     public static byte[] toByteArrayFromFile(String imageFile) throws Exception {

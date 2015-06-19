@@ -21,16 +21,12 @@ import static org.cneng.httpclient.ExcelUtil.getString;
  * @version 1.0
  * @since 2015/6/11
  */
-public class ExcelMaker {
-    private static final Logger _log = LoggerFactory.getLogger(ExcelMaker.class);
+public class ExcelWriter {
+    private static final Logger _log = LoggerFactory.getLogger(ExcelWriter.class);
     private Workbook wb;
-    FormulaEvaluator evaluator;
-    private QueryManager queryManager;
 
-    public ExcelMaker(String filename) throws Exception {
+    public ExcelWriter(String filename) throws Exception {
         wb = new SXSSFWorkbook(new XSSFWorkbook(new FileInputStream(filename)), 500);
-        evaluator = wb.getCreationHelper().createFormulaEvaluator();
-        queryManager = QueryManager.getInstance();
     }
 
     public List<String> check() throws Exception {
@@ -44,30 +40,6 @@ public class ExcelMaker {
 
             for (int i = 1; i <= rowNum; i++) {
                 Row row = sheet.getRow(i);
-                // 企业名称
-                String companyName = getString(evaluator, row, 0);
-                // 注册号
-                String taxno = getString(evaluator, row, 1);
-                // 法定代表人
-                String lawPerson = getString(evaluator, row, 2);
-                // 成立日期
-                Date regDate = getDate(evaluator, row, 3);
-                // 住所
-                String location = getString(evaluator, row, 4);
-                // 经营范围
-                String business = getString(evaluator, row, 5);
-                // 股东/发起人
-                String stockholder = getString(evaluator, row, 6);
-                // 具体经营项目
-                String detail = getString(evaluator, row, 7);
-                // 是否有违法
-                String illegal = getString(evaluator, row, 8);
-                // 是否有行政处罚
-                String penalty = getString(evaluator, row, 9);
-                // 是否经常异常
-                String exception = getString(evaluator, row, 10);
-                // 链接
-                String link = getString(evaluator, row, 11);
                 // 判断字体颜色是否为红色
                 CellStyle cellStyle = row.getCell(0).getCellStyle();
                 if (IndexedColors.RED.index == wb.getFontAt(cellStyle

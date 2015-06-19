@@ -28,7 +28,7 @@ public class JdbcUtils {
      *
      */
     public static void main(String[] args) throws Exception {
-        startIdMap(new HashMap<>());
+//        startIdMap(new HashMap<>());
 //        /******************测试插入操作*****************/
 //        String insertSql = "insert into record(description,content,createdTime,modifyTime) values (?,?,?,?)";
 //        for (int i = 0; i < 100; i++) {
@@ -82,9 +82,9 @@ public class JdbcUtils {
 
     /**
      * 初始化IDMAP
-     * @param map
+     * @param idmap
      */
-    public static synchronized void startIdMap(Map<String, String> map) {
+    public static synchronized void startIdMap(Map<String, String> idmap, Set<String> nameSet) {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -94,7 +94,10 @@ public class JdbcUtils {
             ps = conn.prepareStatement(sqlText);
             rs = ps.executeQuery();
             while (rs.next()) {
-                map.put(rs.getString("name"), rs.getString("link"));
+                String n = rs.getString("name");
+                if (nameSet.contains(n)) {
+                    idmap.put(n, rs.getString("link"));
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -167,7 +170,7 @@ public class JdbcUtils {
                 if (ps3 != null) {
                     ps3.close();
                 }
-                _log.info("iter.remove()....");
+                //_log.info("iter.remove()....");
             }
             _log.info("----endIdMap进程执行完成----");
         } catch (Exception e) {

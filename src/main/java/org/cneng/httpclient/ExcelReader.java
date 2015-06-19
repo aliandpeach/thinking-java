@@ -1,17 +1,12 @@
 package org.cneng.httpclient;
 
-import ch19enums.Input;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -28,13 +23,13 @@ import static org.cneng.httpclient.ExcelUtil.getString;
  * @version 1.0
  * @since 2015/6/5
  */
-public class ExcelCheck {
-    private static final Logger _log = LoggerFactory.getLogger(ExcelCheck.class);
+public class ExcelReader {
+    private static final Logger _log = LoggerFactory.getLogger(ExcelReader.class);
     private Workbook wb;
     FormulaEvaluator evaluator;
     private QueryManager queryManager;
 
-    public ExcelCheck(String filename) throws Exception {
+    public ExcelReader(String filename) throws Exception {
         wb = new SXSSFWorkbook(new XSSFWorkbook(new FileInputStream(filename)), 500);
         evaluator = wb.getCreationHelper().createFormulaEvaluator();
         queryManager = QueryManager.getInstance();
