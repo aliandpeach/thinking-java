@@ -187,6 +187,159 @@ public class JdbcUtils {
         }
         return companies;
     }
+    /**
+     * 获取发票列表
+     * @param idmap
+     */
+    public static List<Invoice> selectInvoices() {
+        List<Invoice> invoices = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlText = "SELECT " +
+                "InvNo" +
+                ",InvDate" +
+                ",InvKind" +
+                ",Seller" +
+                ",SellerTaxCode" +
+                ",SellerAccounts" +
+                ",SellerAddress" +
+                ",Amount" +
+                ",Buyer" +
+                ",BuyTaxCode" +
+                ",BuyerAccounts" +
+                ",BuyerAddress" +
+                ",Bszt" +
+                ",KPR " +
+                ",ListFlag " +
+                ",MachineNum " +
+                ",Memo " +
+                ",Tax " +
+                ",TaxRate " +
+                ",TypeCode " +
+                ",WareName " +
+                ",Zfbz " +
+                "FROM `t_invoice` WHERE SellerTaxCode <> '44010055440279X'";
+        try {
+            conn = getConnection();
+            ps = conn.prepareStatement(sqlText);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                Invoice c = new Invoice();
+                c.setInvNo(rs.getString(1));
+                c.setInvDate(DateUtil.sqlToDate(rs.getDate(2)));
+                c.setInvKind(rs.getString(3));
+                c.setSeller(rs.getString(4));
+                c.setSellerTaxCode(rs.getString(5));
+                c.setSellerAccounts(rs.getString(6));
+                c.setSellerAddress(rs.getString(7));
+                c.setAmount(rs.getDouble(8));
+                c.setBuyer(rs.getString(9));
+                c.setBuyTaxCode(rs.getString(10));
+                c.setBuyerAccounts(rs.getString(11));
+                c.setBuyerAddress(rs.getString(12));
+                c.setBszt(rs.getString(13));
+                c.setKPR(rs.getString(14));
+                c.setListFlag(rs.getString(15));
+                c.setMachineNum(rs.getInt(16));
+                c.setMemo(rs.getString(17));
+                c.setTax(rs.getFloat(18));
+                c.setTaxRate(rs.getFloat(19));
+                c.setTypeCode(rs.getString(20));
+                c.setWareName(rs.getString(21));
+                c.setZfbz(rs.getString(22));
+                invoices.add(c);
+            }
+        } catch (Exception e) {
+            _log.error("查询Invoice出错。", e);
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return invoices;
+    }
+
+    /**
+     * 获取发票列表
+     * @param idmap
+     */
+    public static List<InvoiceDetail> selectInvoiceDetails() {
+        List<InvoiceDetail> invoiceDetails = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlText = "SELECT " +
+                "B.InvNo AS InvNo" +
+                ",A.Wares_Amount AS Wares_Amount" +
+                ",A.Wares_LineType AS Wares_LineType" +
+                ",A.Wares_Number AS Wares_Number" +
+                ",A.Wares_Price AS Wares_Price" +
+                ",A.Wares_Standard AS Wares_Standard" +
+                ",A.Wares_Tax AS Wares_Tax" +
+                ",A.Wares_TaxItem AS Wares_TaxItem" +
+                ",A.Wares_TaxRate AS Wares_TaxRate" +
+                ",A.Wares_TaxTag AS Wares_TaxTag" +
+                ",A.Wares_Unit AS Wares_Unit" +
+                ",A.Wares_WareName AS Wares_WareName " +
+                " FROM t_invoice_detail A LEFT OUTER JOIN t_invoice B ON A.invoice_id=B.id" +
+                " WHERE B.SellerTaxCode <> '44010055440279X'";
+        try {
+            conn = getConnection();
+            ps = conn.prepareStatement(sqlText);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                InvoiceDetail c = new InvoiceDetail();
+                c.setInvNo(rs.getString(1));
+                c.setWares_Amount(rs.getDouble(2));
+                c.setWares_LineType(rs.getString(3));
+                c.setWares_Number(rs.getInt(4));
+                c.setWares_Price(rs.getFloat(5));
+                c.setWares_Standard(rs.getString(6));
+                c.setWares_Tax(rs.getDouble(7));
+                c.setWares_TaxItem(rs.getString(8));
+                c.setWares_TaxRate(rs.getFloat(9));
+                c.setWares_TaxTag(rs.getString(10));
+                c.setWares_Unit(rs.getString(11));
+                c.setWares_WareName(rs.getString(12));
+
+                invoiceDetails.add(c);
+            }
+            Collections.sort(invoiceDetails, new Comparator<InvoiceDetail>() {
+                @Override
+                public int compare(InvoiceDetail o1, InvoiceDetail o2) {
+                    return o1.getInvNo().compareTo(o2.getInvNo());
+                }
+            });
+        } catch (Exception e) {
+            _log.error("查询Invoice出错。", e);
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return invoiceDetails;
+    }
 
     private static final Lock idmLock = new ReentrantLock();
     /**

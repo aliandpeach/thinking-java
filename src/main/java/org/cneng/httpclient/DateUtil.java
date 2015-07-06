@@ -26,4 +26,9 @@ public class DateUtil {
     public static String toStr(Date d) {
         return d == null ? "" : df1.format(d);
     }
+
+    public static Date sqlToDate(java.sql.Date sdate) {
+        if (sdate == null) return null;
+        return new java.util.Date(sdate.getTime());
+    }
 }
