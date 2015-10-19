@@ -3,6 +3,7 @@ package org.cneng.httpclient;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.cneng.pool.c3p0.JdbcUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -614,9 +615,17 @@ public class ExcelWriter {
 
     public static void main(String[] args) {
 //        List<Company> companies = JdbcUtils.selectCompanys();
-        List<Invoice> invoices = JdbcUtils.selectInvoices();
-        List<InvoiceDetail> invoiceDetails = JdbcUtils.selectInvoiceDetails();
-        new ExcelWriter().generateInvoice(invoices, "D:/work/invoices.xlsx");
-        new ExcelWriter().generateInvoiceDetails(invoiceDetails, "D:/work/invoiceDetails.xlsx");
+        String f = "D:\\work\\projects\\gitprojects\\thinking-java\\src\\main\\resources\\names.txt";
+        List<String> names = JdbcUtils.getNames(f);
+//        for (String name : names) {
+//            String taxcode = JdbcUtils.selectTaxcode(name);
+//            List<Invoice> invoices = JdbcUtils.selectInvoices(taxcode);
+//            List<InvoiceDetail> invoiceDetails = JdbcUtils.selectInvoiceDetails(taxcode);
+//            if (invoices != null && invoices.size() > 0) {
+//                new ExcelWriter().generateInvoice(invoices, String.format("D:/work/invoices_%s.xlsx", name));
+//                new ExcelWriter().generateInvoiceDetails(invoiceDetails, String.format("D:/work/invoiceDetails_%s.xlsx", name));
+//            }
+//        }
+        System.out.println(JdbcUtils.selectInvoiceExsits(f).size());
     }
 }

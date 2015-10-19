@@ -5,7 +5,10 @@ import org.cneng.pool.c3p0.JdbcUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
@@ -187,42 +190,159 @@ public class JdbcUtils {
         }
         return companies;
     }
+
+    /**
+     * 根据配置文件获取企业名列表
+     *
+     * @param fileName 企业名列表文件名
+     */
+    public static List<String> getNames(String fileName) {
+        List<String> result = new ArrayList<>();
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(
+                    new InputStreamReader(new FileInputStream(fileName), "UTF-8"));
+            String compName;
+            while ((compName = in.readLine()) != null) {
+                if (StringUtil.isNotBlank(compName)) {
+                    _log.info("---企业名：" + compName);
+                    compName = compName.replaceAll("（", "(").replaceAll("）", ")");
+                    result.add(compName.trim());
+                }
+            }
+        } catch (Exception e) {
+            _log.error("读取企业名文件出错。", e);
+        } finally {
+            try {
+                assert in != null;
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return result;
+    }
+
+    public static String selectTaxcode(String compName) {
+        String result = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlText = "SELECT cust_tax_code " +
+                "FROM t_crm_company WHERE cust_name=? OR cust_name=? LIMIT 1;";
+        try {
+            conn = getConnection();
+            ps = conn.prepareStatement(sqlText);
+            ps.setString(1, compName);
+            ps.setString(2, compName);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                result = rs.getString(1);
+            }
+        } catch (Exception e) {
+            _log.error("查询税号出错。", e);
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 根据企业名配置文件查找存在发票记录的企业名
+     * @param filename
+     * @return
+     */
+    public static List<String> selectInvoiceExsits(String filename) {
+        List<String> result = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlText = "SELECT COUNT(*) FROM t_invoice WHERE Seller=?;";
+        List<String> compNames = getNames(filename);
+        try {
+            conn = getConnection();
+            for (String n : compNames) {
+                ps = conn.prepareStatement(sqlText);
+                ps.setString(1, n);
+                rs = ps.executeQuery();
+                if (rs.next()) {
+                    if (rs.getInt(1) > 0) {
+                        result.add(n);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            _log.error("查询税号出错。", e);
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
+    }
+
+
+
     /**
      * 获取发票列表
      * @param idmap
      */
-    public static List<Invoice> selectInvoices() {
+    public static List<Invoice> selectInvoices(String taxcode) {
         List<Invoice> invoices = new ArrayList<>();
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         String sqlText = "SELECT " +
-                "InvNo" +
-                ",InvDate" +
-                ",InvKind" +
-                ",Seller" +
-                ",SellerTaxCode" +
-                ",SellerAccounts" +
-                ",SellerAddress" +
-                ",Amount" +
-                ",Buyer" +
-                ",BuyTaxCode" +
-                ",BuyerAccounts" +
-                ",BuyerAddress" +
-                ",Bszt" +
-                ",KPR " +
-                ",ListFlag " +
-                ",MachineNum " +
-                ",Memo " +
-                ",Tax " +
-                ",TaxRate " +
-                ",TypeCode " +
-                ",WareName " +
-                ",Zfbz " +
-                "FROM `t_invoice` WHERE SellerTaxCode <> '44010055440279X'";
+                "A.InvNo" +
+                ",A.InvDate" +
+                ",A.InvKind" +
+                ",A.Seller" +
+                ",A.SellerTaxCode" +
+                ",A.SellerAccounts" +
+                ",A.SellerAddress" +
+                ",A.Amount" +
+                ",A.Buyer" +
+                ",A.BuyTaxCode" +
+                ",A.BuyerAccounts" +
+                ",A.BuyerAddress" +
+                ",A.Bszt" +
+                ",A.KPR " +
+                ",A.ListFlag " +
+                ",A.MachineNum " +
+                ",A.Memo " +
+                ",A.Tax " +
+                ",A.TaxRate " +
+                ",A.TypeCode " +
+                ",A.WareName " +
+                ",A.Zfbz " +
+                "FROM `t_invoice` A WHERE A.SellerTaxCode=?;";
         try {
             conn = getConnection();
             ps = conn.prepareStatement(sqlText);
+            ps.setString(1, taxcode);
             rs = ps.executeQuery();
             while (rs.next()) {
                 Invoice c = new Invoice();
@@ -274,7 +394,7 @@ public class JdbcUtils {
      * 获取发票列表
      * @param idmap
      */
-    public static List<InvoiceDetail> selectInvoiceDetails() {
+    public static List<InvoiceDetail> selectInvoiceDetails(String taxcode) {
         List<InvoiceDetail> invoiceDetails = new ArrayList<>();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -293,10 +413,11 @@ public class JdbcUtils {
                 ",A.Wares_Unit AS Wares_Unit" +
                 ",A.Wares_WareName AS Wares_WareName " +
                 " FROM t_invoice_detail A LEFT OUTER JOIN t_invoice B ON A.invoice_id=B.id" +
-                " WHERE B.SellerTaxCode <> '44010055440279X'";
+                " WHERE B.SellerTaxCode = ?";
         try {
             conn = getConnection();
             ps = conn.prepareStatement(sqlText);
+            ps.setString(1, taxcode);
             rs = ps.executeQuery();
             while (rs.next()) {
                 InvoiceDetail c = new InvoiceDetail();
