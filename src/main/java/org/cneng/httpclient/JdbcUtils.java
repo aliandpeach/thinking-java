@@ -1,6 +1,7 @@
 package org.cneng.httpclient;
 
 import ch17database.Record;
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.cneng.pool.c3p0.JdbcUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -231,6 +232,8 @@ public class JdbcUtils {
         ResultSet rs = null;
         String sqlText = "SELECT cust_tax_code " +
                 "FROM t_crm_company WHERE cust_name=? OR cust_name=? LIMIT 1;";
+        String sqlText2 = "SELECT SellerTaxCode FROM t_invoice " +
+                "WHERE Seller=? LIMIT 1";
         try {
             conn = getConnection();
             ps = conn.prepareStatement(sqlText);
@@ -239,6 +242,13 @@ public class JdbcUtils {
             rs = ps.executeQuery();
             if (rs.next()) {
                 result = rs.getString(1);
+            } else {
+                ps = conn.prepareStatement(sqlText2);
+                ps.setString(1, compName);
+                rs = ps.executeQuery();
+                if (rs.next()) {
+                    result = rs.getString(1);
+                }
             }
         } catch (Exception e) {
             _log.error("查询税号出错。", e);
@@ -742,18 +752,18 @@ public class JdbcUtils {
     private static Connection getConnection() throws Exception {
         Connection conn = null;
         try {
-            Properties props = new Properties();
-            FileInputStream jdbcConfig = new FileInputStream("src/main/resources/jdbc.properties");
-            props.load(jdbcConfig);
-            jdbcConfig.close();
-
-            String driver = props.getProperty("jdbc.driver");
+//            Properties props = new Properties();
+            PropertiesConfiguration props = new PropertiesConfiguration("jdbc.properties");
+//            FileInputStream jdbcConfig = new FileInputStream("src/main/resources/jdbc.properties");
+//            props.load(jdbcConfig);
+//            jdbcConfig.close();
+            String driver = props.getString("jdbc.driver");
             if (driver != null) {
                 Class.forName(driver);
             }
-            String url = props.getProperty("jdbc.url");
-            String username = props.getProperty("jdbc.username");
-            String password = props.getProperty("jdbc.password");
+            String url = props.getString("jdbc.url");
+            String username = props.getString("jdbc.username");
+            String password = props.getString("jdbc.password");
             conn = DriverManager.getConnection(url, username, password);
             _log.info("Database connection established");
         } catch (Exception e) {

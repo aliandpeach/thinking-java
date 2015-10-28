@@ -615,17 +615,18 @@ public class ExcelWriter {
 
     public static void main(String[] args) {
 //        List<Company> companies = JdbcUtils.selectCompanys();
-        String f = "D:\\work\\projects\\gitprojects\\thinking-java\\src\\main\\resources\\names.txt";
+        String f = ConfigUtil.get("names_file");
+        String outDir = ConfigUtil.get("excel_out_dir");
         List<String> names = JdbcUtils.getNames(f);
-//        for (String name : names) {
-//            String taxcode = JdbcUtils.selectTaxcode(name);
-//            List<Invoice> invoices = JdbcUtils.selectInvoices(taxcode);
-//            List<InvoiceDetail> invoiceDetails = JdbcUtils.selectInvoiceDetails(taxcode);
-//            if (invoices != null && invoices.size() > 0) {
-//                new ExcelWriter().generateInvoice(invoices, String.format("D:/work/invoices_%s.xlsx", name));
-//                new ExcelWriter().generateInvoiceDetails(invoiceDetails, String.format("D:/work/invoiceDetails_%s.xlsx", name));
-//            }
-//        }
-        System.out.println(JdbcUtils.selectInvoiceExsits(f).size());
+        for (String name : names) {
+            String taxcode = JdbcUtils.selectTaxcode(name);
+            List<Invoice> invoices = JdbcUtils.selectInvoices(taxcode);
+            List<InvoiceDetail> invoiceDetails = JdbcUtils.selectInvoiceDetails(taxcode);
+            if (invoices != null && invoices.size() > 0) {
+                new ExcelWriter().generateInvoice(invoices, String.format("%s/invoices_%s.xlsx", outDir, name));
+                new ExcelWriter().generateInvoiceDetails(invoiceDetails, String.format("%s/invoiceDetails_%s.xlsx", outDir, name));
+            }
+        }
+//        System.out.println(JdbcUtils.selectInvoiceExsits(f).size());
     }
 }
