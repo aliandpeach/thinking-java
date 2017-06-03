@@ -12,7 +12,7 @@ public class CarWash {
         CarWash wash = new CarWash();
         print(wash);
         wash.washCar();
-        // Order of addition is unimportant:
+        // OrderSync of addition is unimportant:
         wash.add(Cycle.BLOWDRY);
         wash.add(Cycle.BLOWDRY); // Duplicates ignored
         wash.add(Cycle.RINSE);

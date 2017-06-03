@@ -7,7 +7,7 @@ import java.math.BigDecimal;
  * User: Administrator
  * Date: 12-6-29
  * Time: 上午11:28
- * Order
+ * OrderSync
  */
 public class Order {
     private long id;
@@ -59,7 +59,7 @@ public class Order {
 
 
     public String toddString() {
-        return "Order{" +
+        return "OrderSync{" +
                 "id=" + id +
                 ", describe=" + describe +
                 ", personName=" + personName +
@@ -69,7 +69,7 @@ public class Order {
 
     @Override
     public String toString() {
-        return "Order{" +
+        return "OrderSync{" +
                 "id=" + id +
                 ", describe='" + describe + '\'' +
                 ", personName='" + personName + '\'' +

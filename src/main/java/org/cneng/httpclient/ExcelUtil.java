@@ -15,7 +15,7 @@ import java.util.Date;
  * <b>功能描述 :</b> <br/>
  * <b>版本历史 :</b> <br/>
  *
- * @author wanrui| 2015年3月12日 上午10:39:54 | 创建
+ * @author XiongNeng| 2015年3月12日 上午10:39:54 | 创建
  */
 public class ExcelUtil {
     private static final Logger logger = LoggerFactory.getLogger(ExcelUtil.class);
