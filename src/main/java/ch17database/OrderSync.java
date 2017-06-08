@@ -1,5 +1,7 @@
 package ch17database;
 
+import net.mindview.util.Sets;
+
 import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -22,8 +24,9 @@ public class OrderSync {
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public static void main(String[] args) throws Exception {
-        List<Order> orderList = prepareData();
-        saveOrders(orderList);
+        printDiff();
+//        List<Order> orderList = prepareData();
+//        saveOrders(orderList);
 //        Pattern pattern = Pattern.compile("^.*\"re_openid\":\"(.*?)\".*\"total_amount\":\"(.*?)\".*$");
 //        String a = "2017-06-01 11:58:47 {\"re_openid\":\"oo38ov05CIYjF8IJhyDQggjRIa-s\",\"total_amount\":\"880\",\"err_code\":\"SUCCESS\",\"return_msg\":\"发放成功\",\"result_code\":\"SUCCESS\",\"err_code_des\":\"发放成功\",\"mch_id\":\"1293290901\",\"send_listid\":\"1000041701201706013000057759193\",\"return_code\":\"SUCCESS\",\"wxappid\":\"wx9abbb2bf93e4f1d7\",\"mch_billno\":\"chongqing6482094\"}";
 //        Matcher matcher = pattern.matcher(a);
@@ -32,6 +35,55 @@ public class OrderSync {
 //            System.out.println(matcher.group(1));
 //            System.out.println(matcher.group(2));
 //        }
+    }
+
+    private static void printDiff() throws Exception {
+        Set<String> dborderidSet = new HashSet<>();
+        Set<String> wxorderidSet = new HashSet<>();
+        BufferedReader s = null;
+        BufferedReader s2 = null;
+        try {
+            s = new BufferedReader(new InputStreamReader(
+                    new FileInputStream("D:/download/order.txt"), "UTF-8"));
+            String tmp = s.readLine();
+            while (tmp != null && !"".equals(tmp.trim())) {
+                tmp = tmp.trim();
+                dborderidSet.add(tmp);
+                tmp = s.readLine();
+            }
+            s2 = new BufferedReader(new InputStreamReader(
+                    new FileInputStream("D:/download/chongqing.csv"), "UTF-8"));
+            String tmp2 = s2.readLine();
+            while (tmp2 != null && !"".equals(tmp2.trim())) {
+                tmp2 = tmp2.trim();
+                String[] strlist = tmp2.split("：");
+                wxorderidSet.add(strlist[1]);
+                tmp2 = s2.readLine();
+            }
+
+            System.out.println("-------------最后开始比较-----------------");
+            System.out.println("数据库中订单数量：" + dborderidSet.size());
+            System.out.println("微信中订单数量：" + wxorderidSet.size());
+            System.out.println("在db而不在wx中的订单号：dborderidSet - wxorderidSet："
+                    + Sets.difference(dborderidSet, wxorderidSet));
+            Set<String> diffSet =  Sets.difference(dborderidSet, wxorderidSet);
+            for (String df : diffSet) {
+                if (df.startsWith("chongqing")) {
+                    System.out.println("findg............" + df);
+                }
+            }
+            System.out.println("在wx而不在db中的订单号：wxorderidSet - dborderidSet："
+                    + Sets.difference(wxorderidSet, dborderidSet));
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (s != null) s.close();
+                if (s2 != null) s2.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private static List<Order> prepareData()  throws Exception {
