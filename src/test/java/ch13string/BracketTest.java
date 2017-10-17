@@ -1,23 +1,11 @@
-import net.mindview.util.CountingGenerator;
+package ch13string;
 
-import java.lang.reflect.Field;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
- * Description of this file.
- *
- * @author XiongNeng
- * @version 1.0
- * @since 14-3-24
+ * test
  */
-public class Test {
-    public static void main(String[] args) throws Exception {
-        String str = "&nbsp;&nbsp;";
-        System.out.println(str.replace("&nbsp;", ""));
-    }
-
+public class BracketTest {
     private static boolean checkEmail(String email) {
         // 先将字符串变成字符数组
         char[] emailChars = email.toCharArray();
@@ -60,7 +48,7 @@ public class Test {
         return -1;
     }
 
-    private static boolean papapa(String str) {
+    private static boolean matchBracket(String str) {
         Set<Character> left = new HashSet<Character>() {{
             add('{');
             add('[');
@@ -85,5 +73,4 @@ public class Test {
         }
         return true;
     }
-
 }

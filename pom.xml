@@ -16,22 +16,22 @@
         <spring.version>3.2.13.RELEASE</spring.version>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>nexus-repo</id>
-            <url>http://192.168.203.95:8081/content/groups/public</url>
-        </repository>
-        <repository>
-            <id>EclipsePaho</id>
-            <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>nexus-repo</id>
-            <url>http://192.168.203.95:8081/content/groups/public</url>
-        </pluginRepository>
-    </pluginRepositories>
+    <!--<repositories>-->
+        <!--<repository>-->
+            <!--<id>nexus-repo</id>-->
+            <!--<url>http://192.168.203.95:8081/content/groups/public</url>-->
+        <!--</repository>-->
+        <!--<repository>-->
+            <!--<id>EclipsePaho</id>-->
+            <!--<url>https://repo.eclipse.org/content/repositories/paho-releases/</url>-->
+        <!--</repository>-->
+    <!--</repositories>-->
+    <!--<pluginRepositories>-->
+        <!--<pluginRepository>-->
+            <!--<id>nexus-repo</id>-->
+            <!--<url>http://192.168.203.95:8081/content/groups/public</url>-->
+        <!--</pluginRepository>-->
+    <!--</pluginRepositories>-->
 
     <dependencies>
         <!-- junit4单元测试-->
@@ -167,52 +167,15 @@
             <artifactId>poi-ooxml</artifactId>
             <version>3.11</version>
         </dependency>
-        <!-- Spring3.2.13依赖-->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context-support</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jdbc</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-        </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
         </dependency>
-
     </dependencies>
 
     <build>
-        <finalName>fastloan-consumer</finalName>
+        <finalName>thinking-java</finalName>
         <sourceDirectory>src/main/java</sourceDirectory>
         <plugins>
             <plugin>
@@ -255,32 +218,6 @@
                     <skipTests>true</skipTests>
                     <testFailureIgnore>true</testFailureIgnore>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.1</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/spring.handlers</resource>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.cneng.httpclient.ExcelWriter</mainClass>
-                                </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/spring.schemas</resource>
-                                </transformer>
-                            </transformers>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
