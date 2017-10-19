@@ -1,11 +1,11 @@
 package ch13string;//: strings/TheReplacements.java
 
-import net.mindview.util.TextFile;
+import mindview.TextFile;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static net.mindview.util.Print.print;
+import static mindview.Print.print;
 
 /*! Here's a block of text to use as input to
  the regular expression matcher. Note that we'll

@@ -1,6 +1,6 @@
 package ch11collection;
 
-import net.mindview.util.Sets;
+import mindview.Sets;
 
 import java.util.HashMap;
 import java.util.HashSet;

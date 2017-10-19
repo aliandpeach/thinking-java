@@ -1,6 +1,7 @@
 package ch15generic.typeinfo.pojo;//: ch15generic.typeinfo/Person.java
 // A class with a Null Object.
 
+import mindview.Null;
 import net.mindview.util.*;
 
 public class Person {

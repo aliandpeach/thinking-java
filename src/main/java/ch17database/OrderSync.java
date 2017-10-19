@@ -1,6 +1,6 @@
 package ch17database;
 
-import net.mindview.util.Sets;
+import mindview.Sets;
 
 import java.io.*;
 import java.sql.Connection;

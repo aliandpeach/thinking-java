@@ -1,7 +1,7 @@
 package ch21concurrent;//: concurrency/Joining.java
 // Understanding join().
 
-import static net.mindview.util.Print.*;
+import static mindview.Print.*;
 
 public class Joining {
     public static void join() {

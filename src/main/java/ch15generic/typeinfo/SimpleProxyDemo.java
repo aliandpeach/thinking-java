@@ -2,7 +2,7 @@ package ch15generic.typeinfo;//: ch15generic.typeinfo/SimpleProxyDemo.java
 
 import ch15generic.typeinfo.pojo.RealObject;
 
-import static net.mindview.util.Print.print;
+import static mindview.Print.print;
 
 class SimpleProxy implements Interface {
     private Interface proxied;

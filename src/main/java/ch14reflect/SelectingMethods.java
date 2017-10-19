@@ -3,7 +3,7 @@ package ch14reflect;//: ch15generic.typeinfo/SelectingMethods.java
 
 import java.lang.reflect.*;
 
-import static net.mindview.util.Print.*;
+import static mindview.Print.*;
 
 class MethodSelector implements InvocationHandler {
     private Object proxied;

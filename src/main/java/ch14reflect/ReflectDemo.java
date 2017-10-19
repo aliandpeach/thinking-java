@@ -8,8 +8,8 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.mindview.util.Print.print;
-import static net.mindview.util.Print.printnb;
+import static mindview.Print.print;
+import static mindview.Print.printnb;
 
 public class ReflectDemo {
 

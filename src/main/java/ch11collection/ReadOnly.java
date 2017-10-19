@@ -3,9 +3,10 @@ package ch11collection;//: containers/ReadOnly.java
 
 import java.util.*;
 
+import mindview.Countries;
 import net.mindview.util.*;
 
-import static net.mindview.util.Print.*;
+import static mindview.Print.*;
 
 /**
  * 只读的集合类

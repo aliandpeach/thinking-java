@@ -1,6 +1,6 @@
 package ch01basic;
 
-import static net.mindview.util.Print.print;
+import static mindview.Print.print;
 
 public class BasicDemo {
     /**

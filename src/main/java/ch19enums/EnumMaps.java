@@ -5,7 +5,7 @@ package ch19enums;
 import java.util.*;
 
 import static ch19enums.AlarmPoints.*;
-import static net.mindview.util.Print.*;
+import static mindview.Print.*;
 
 public class EnumMaps {
     /**

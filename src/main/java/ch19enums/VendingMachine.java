@@ -4,10 +4,12 @@ package ch19enums;
 
 import java.util.*;
 
+import mindview.Generator;
+import mindview.TextFile;
 import net.mindview.util.*;
 
 import static ch19enums.Input.*;
-import static net.mindview.util.Print.*;
+import static mindview.Print.*;
 
 /**
  * 自动贩卖机模拟状态机，用enum实现

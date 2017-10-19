@@ -2,7 +2,7 @@ package ch19enums;//: enumerated/CarWash.java
 
 import java.util.*;
 
-import static net.mindview.util.Print.*;
+import static mindview.Print.*;
 
 public class CarWash {
     /**

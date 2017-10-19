@@ -3,7 +3,7 @@ package ch18io;//: io/ExternalizableDemo.java
 
 import java.io.*;
 
-import static net.mindview.util.Print.*;
+import static mindview.Print.*;
 
 /**
  * 利用Externalizable接口手动控制序列化

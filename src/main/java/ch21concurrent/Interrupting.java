@@ -1,7 +1,7 @@
 package ch21concurrent;//: concurrency/Interrupting.java
 // Interrupting a blocked thread.
 
-import static net.mindview.util.Print.print;
+import static mindview.Print.print;
 
 import java.io.IOException;
 import java.io.InputStream;
