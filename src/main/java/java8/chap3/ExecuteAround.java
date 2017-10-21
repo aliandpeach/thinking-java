@@ -34,8 +34,8 @@ public class ExecuteAround {
 
 	}
 
+	@FunctionalInterface
 	public interface BufferedReaderProcessor{
 		public String process(BufferedReader b) throws IOException;
-
 	}
 }
