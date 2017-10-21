@@ -1,6 +1,6 @@
 package java8.chap11.v1;
 
-import static lambdasinaction.chap11.Util.delay;
+import static java8.chap11.Util.delay;
 
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;

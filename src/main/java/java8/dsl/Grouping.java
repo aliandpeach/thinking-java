@@ -16,7 +16,7 @@
 
 package java8.dsl;
 
-import lambdasinaction.chap6.Dish;
+import java8.chap6.Dish;
 
 import java.util.List;
 import java.util.Map;
@@ -24,8 +24,8 @@ import java.util.function.Function;
 import java.util.stream.Collector;
 
 import static java.util.stream.Collectors.groupingBy;
-import static lambdasinaction.chap6.Dish.menu;
-import static lambdasinaction.dsl.Grouping.GroupingBuilder.groupOn;
+import static java8.chap6.Dish.menu;
+import static java8.dsl.Grouping.GroupingBuilder.groupOn;
 
 public class Grouping {
 

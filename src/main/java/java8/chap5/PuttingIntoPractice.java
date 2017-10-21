@@ -1,6 +1,6 @@
 package java8.chap5;
 
-import lambdasinaction.chap5.*;
+import java8.chap5.*;
 
 import java.util.*;
 

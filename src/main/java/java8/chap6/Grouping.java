@@ -3,8 +3,8 @@ package java8.chap6;
 import java.util.*;
 
 import static java.util.stream.Collectors.*;
-import static lambdasinaction.chap6.Dish.dishTags;
-import static lambdasinaction.chap6.Dish.menu;
+import static java8.chap6.Dish.dishTags;
+import static java8.chap6.Dish.menu;
 
 public class Grouping {
 
@@ -33,12 +33,14 @@ public class Grouping {
     }
 
     private static Map<Dish.Type, Set<String>> groupDishTagsByType() {
-        return menu.stream().collect(groupingBy(Dish::getType, flatMapping(dish -> dishTags.get( dish.getName() ).stream(), toSet())));
+//        return menu.stream().collect(groupingBy(Dish::getType, flatMapping(dish -> dishTags.get( dish.getName() ).stream(), toSet())));
+        return null;
     }
 
     private static Map<Dish.Type, List<Dish>> groupCaloricDishesByType() {
 //        return menu.stream().filter(dish -> dish.getCalories() > 500).collect(groupingBy(Dish::getType));
-        return menu.stream().collect(groupingBy(Dish::getType, filtering(dish -> dish.getCalories() > 500, toList())));
+//        return menu.stream().collect(groupingBy(Dish::getType, filtering(dish -> dish.getCalories() > 500, toList())));
+        return null;
     }
 
     private static Map<CaloricLevel, List<Dish>> groupDishesByCaloricLevel() {

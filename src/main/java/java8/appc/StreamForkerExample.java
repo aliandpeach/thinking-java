@@ -1,9 +1,9 @@
 package java8.appc;
 
-import lambdasinaction.chap6.*;
+import java8.chap6.*;
 
 import static java.util.stream.Collectors.*;
-import static lambdasinaction.chap6.Dish.menu;
+import static java8.chap6.Dish.menu;
 
 import java.util.*;
 import java.util.stream.*;

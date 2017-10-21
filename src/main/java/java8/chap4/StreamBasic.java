@@ -6,7 +6,7 @@ import java.util.stream.*;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 
-import static lambdasinaction.chap4.Dish.menu;
+import static java8.chap4.Dish.menu;
 
 public class StreamBasic {
 

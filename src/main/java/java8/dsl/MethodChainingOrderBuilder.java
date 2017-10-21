@@ -16,9 +16,9 @@
 
 package java8.dsl;
 
-import lambdasinaction.dsl.model.Order;
-import lambdasinaction.dsl.model.Stock;
-import lambdasinaction.dsl.model.Trade;
+import java8.dsl.model.Order;
+import java8.dsl.model.Stock;
+import java8.dsl.model.Trade;
 
 public class MethodChainingOrderBuilder {
 
