@@ -1,8 +1,8 @@
 package examples.httpclient;
 
 import ch17database.Record;
+import examples.pool.dbutils.JdbcUtil;
 import org.apache.commons.configuration.PropertiesConfiguration;
-import examples.pool.c3p0.JdbcUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -16,8 +16,8 @@
 
 package java8.dsl;
 
-import lambdasinaction.dsl.model.Order;
-import lambdasinaction.dsl.model.Tax;
+import java8.dsl.model.Order;
+import java8.dsl.model.Tax;
 
 import java.util.function.Function;
 

@@ -4,7 +4,7 @@ import java.util.*;
 
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.*;
-import static lambdasinaction.chap6.Dish.menu;
+import static java8.chap6.Dish.menu;
 
 public class Partitioning {
 

@@ -16,12 +16,12 @@
 
 package java8.dsl;
 
-import lambdasinaction.dsl.model.Order;
-import lambdasinaction.dsl.model.Stock;
-import lambdasinaction.dsl.model.Trade;
+import java8.dsl.model.Order;
+import java8.dsl.model.Stock;
+import java8.dsl.model.Trade;
 
-import static lambdasinaction.dsl.MethodChainingOrderBuilder.forCustomer;
-import static lambdasinaction.dsl.NestedFunctionOrderBuilder.*;
+import static java8.dsl.MethodChainingOrderBuilder.forCustomer;
+import static java8.dsl.NestedFunctionOrderBuilder.*;
 
 public class Main {
 

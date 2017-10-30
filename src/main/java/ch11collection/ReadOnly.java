@@ -4,7 +4,6 @@ package ch11collection;//: containers/ReadOnly.java
 import java.util.*;
 
 import mindview.Countries;
-import net.mindview.util.*;
 
 import static mindview.Print.*;
 
