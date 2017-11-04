@@ -12,7 +12,7 @@ import java.util.List;
 public class StreamTest {
     private List<Dish> menus;
     @Before
-    private void pre() {
+    public void pre() {
         menus = Arrays.asList(
                 new Dish("pork", false, 800, Dish.Type.MEAT),
                 new Dish("beef", false, 700, Dish.Type.MEAT),
