@@ -13,6 +13,14 @@ public class ExcelXLSXReaderTest {
 
     @Test
     public void testCheck() throws Exception {
-        new ExcelXLSXReader("").check();
+        new ExcelXLSXReader("E:\\download\\云彩付文档汇总\\zzz.xlsx").check();
+    }
+    @Test
+    public void testCheck1() throws Exception {
+        System.out.println(String.format("%.2f", Double.valueOf("236.000052")));
+        System.out.println(String.format("%.2f", Double.valueOf("236")));
+        System.out.println(String.format("%.0f", Double.valueOf("236.0")));
+        System.out.println(String.format("%.2f", Double.valueOf("236.09")));
+        System.out.println(String.format("%.2f", Double.valueOf("236.0")));
     }
 }

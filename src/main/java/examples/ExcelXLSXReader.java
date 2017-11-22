@@ -1,22 +1,26 @@
 package examples;
 
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.streaming.SXSSFRow;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import examples.httpclient.QueryManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import static examples.httpclient.ExcelUtil.getString;
+import static org.apache.poi.ss.usermodel.CellType.*;
 
 /**
- * 检查一份excel企业名单表
- * 对于红色字体的部分检查该企业是否已经被注销
- * 对于正常字体部分检查该企业的资料是否正确填写
+ * excel读取
  *
  * @author XiongNeng
  * @version 1.0
@@ -24,34 +28,69 @@ import static examples.httpclient.ExcelUtil.getString;
  */
 public class ExcelXLSXReader {
     private static final Logger _log = LoggerFactory.getLogger(ExcelXLSXReader.class);
-    private Workbook wb;
-    FormulaEvaluator evaluator;
-    private QueryManager queryManager;
+    private XSSFWorkbook wb;
+    private FormulaEvaluator formulaEvaluator = null;
 
     public ExcelXLSXReader(String filename) throws Exception {
-        wb = new SXSSFWorkbook(new XSSFWorkbook(new FileInputStream(filename)), 500);
-        evaluator = wb.getCreationHelper().createFormulaEvaluator();
-        queryManager = QueryManager.getInstance();
+        wb = new XSSFWorkbook(new FileInputStream(filename));
+        formulaEvaluator = new XSSFFormulaEvaluator(wb);
     }
 
     public List<String> check() throws Exception {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         try {
-            //读取第一张表
-            Sheet sheet = wb.getSheet("惠州vip");
-            //得到总行数
-            int rowNum = sheet.getLastRowNum();
-            _log.info("excel表格总行数为：" + rowNum);
-            Row row = sheet.getRow(5);
-            // 专卖证号
-            String tobacco = getString(evaluator, row, 3);
-            // 联系电话
-            String phone = getString(evaluator, row, 6);
-            System.out.println("tobacco=" + tobacco + ", phone=" + phone);
-        } finally {
-            wb.close();
+            // 读取第一章表格内容
+            XSSFSheet sheet = wb.getSheetAt(0);
+            // 定义 row、cell
+            // 循环输出表格中的内容
+            for (Row row : sheet) {
+                for (Cell cell : row) {
+                    //结果比较
+                    System.out.print(getCellValue(cell) + "==VS==" + getCellValueFormula(cell, formulaEvaluator) + "\t");
+                }
+                System.out.println();
+            }
+        } catch (Exception e) {
+            System.out.println("已运行xlRead() : " + e);
         }
         return result;
+    }
+
+    //未处理公式
+    public static String getCellValue(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+
+        switch (cell.getCellTypeEnum()) {
+            case STRING:
+                return cell.getRichStringCellValue().getString().trim();
+            case NUMERIC:
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); //非线程安全
+                    return sdf.format(cell.getDateCellValue());
+                } else {
+                    return String.valueOf(cell.getNumericCellValue());
+                }
+            case BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue());
+            case FORMULA:
+                return cell.getCellFormula();
+            default:
+                return "";
+        }
+    }
+
+    //处理公式
+    public static String getCellValueFormula(Cell cell, FormulaEvaluator formulaEvaluator) {
+        if (cell == null || formulaEvaluator == null) {
+            return null;
+        }
+
+        if (cell.getCellTypeEnum() == FORMULA) {
+            return String.valueOf(formulaEvaluator.evaluate(cell).getNumberValue());
+        }
+        return getCellValue(cell);
     }
 
 }

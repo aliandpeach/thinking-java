@@ -1,13 +1,12 @@
 package examples.httpclient;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellValue;
-import org.apache.poi.ss.usermodel.FormulaEvaluator;
-import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
+
+import static org.apache.poi.ss.usermodel.CellType.FORMULA;
 
 /**
  * EXCEL文件读写工具类
@@ -22,7 +21,7 @@ public class ExcelUtil {
     /**
      * 获取单元格数据内容为字符串类型的数据
      *
-     * @param cell Excel单元格
+     * @param evaluator Excel单元格
      * @return String 单元格数据内容，若为字符串的要加单引号
      */
     public static String getString(FormulaEvaluator evaluator, Row row, int column) {
@@ -32,15 +31,15 @@ public class ExcelUtil {
             if (row == null) return strCell;
             Cell cell = row.getCell(column);
             if (cell == null) return strCell;
-            switch (cell.getCellType()) {
-                // CELL_TYPE_FORMULA will never happen
-                case Cell.CELL_TYPE_FORMULA:
+            switch (cell.getCellTypeEnum()) {
+                // FORMULA will never happen
+                case FORMULA:
                     CellValue cellValue = evaluator.evaluate(cell);
                     if (cellValue == null) return strCell;
                     strCell = cellValue.getStringValue();
                     break;
                 default:
-                    cell.setCellType(Cell.CELL_TYPE_STRING);
+                    cell.setCellType(CellType.STRING);
                     strCell = cell.getStringCellValue();
                     break;
             }
@@ -56,7 +55,7 @@ public class ExcelUtil {
             Cell cell = row.getCell(column);
             CellValue cellValue = evaluator.evaluate(cell);
             if (cellValue == null) return null;
-            if (cellValue.getCellType() == Cell.CELL_TYPE_STRING) {
+            if (cellValue.getCellTypeEnum() == CellType.STRING) {
                 if ("无".equals(cell.getStringCellValue())
                         || StringUtil.isBlank(cell.getStringCellValue())) return null;
             }

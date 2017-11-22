@@ -10,6 +10,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
+import static org.apache.poi.ss.usermodel.BorderStyle.THIN;
+
 /**
  * 根据企业名单自动抓取信息并生成Excel文件
  *
@@ -46,17 +48,17 @@ public class ExcelWriter {
             row.setHeight((short) 400);//目的是想把行高设置成25px
             // 创建单元格，并设置值表头 设置表头居中
             CellStyle style = wb.createCellStyle();
-            style.setBorderBottom(CellStyle.BORDER_THIN);
-            style.setBorderLeft(CellStyle.BORDER_THIN);
-            style.setBorderRight(CellStyle.BORDER_THIN);
-            style.setBorderTop(CellStyle.BORDER_THIN);
-            style.setAlignment(CellStyle.ALIGN_CENTER); // 创建一个居中格式
+            style.setBorderBottom(THIN);
+            style.setBorderLeft(THIN);
+            style.setBorderRight(THIN);
+            style.setBorderTop(THIN);
+            style.setAlignment(HorizontalAlignment.CENTER); // 创建一个居中格式
             Font font = wb.createFont();
             font.setFontHeightInPoints((short) 12);//字号
             font.setColor(Font.COLOR_NORMAL);
             style.setFont(font);
             style.setFillForegroundColor(IndexedColors.LIGHT_ORANGE.getIndex()); //背景颜色
-            style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+            style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
             Cell cell = row.createCell(0);
             cell.setCellValue("企业名称");
@@ -227,17 +229,17 @@ public class ExcelWriter {
             row.setHeight((short) 400);//目的是想把行高设置成25px
             // 创建单元格，并设置值表头 设置表头居中
             CellStyle style = wb.createCellStyle();
-            style.setBorderBottom(CellStyle.BORDER_THIN);
-            style.setBorderLeft(CellStyle.BORDER_THIN);
-            style.setBorderRight(CellStyle.BORDER_THIN);
-            style.setBorderTop(CellStyle.BORDER_THIN);
-            style.setAlignment(CellStyle.ALIGN_CENTER); // 创建一个居中格式
+            style.setBorderBottom(THIN);
+            style.setBorderLeft(THIN);
+            style.setBorderRight(THIN);
+            style.setBorderTop(THIN);
+            style.setAlignment(HorizontalAlignment.CENTER); // 创建一个居中格式
             Font font = wb.createFont();
             font.setFontHeightInPoints((short) 12);//字号
             font.setColor(Font.COLOR_NORMAL);
             style.setFont(font);
             style.setFillForegroundColor(IndexedColors.LIGHT_ORANGE.getIndex()); //背景颜色
-            style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+            style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
             Cell cell = row.createCell(0);
             cell.setCellValue("发票号码");
@@ -471,17 +473,17 @@ public class ExcelWriter {
             row.setHeight((short) 400);//目的是想把行高设置成25px
             // 创建单元格，并设置值表头 设置表头居中
             CellStyle style = wb.createCellStyle();
-            style.setBorderBottom(CellStyle.BORDER_THIN);
-            style.setBorderLeft(CellStyle.BORDER_THIN);
-            style.setBorderRight(CellStyle.BORDER_THIN);
-            style.setBorderTop(CellStyle.BORDER_THIN);
-            style.setAlignment(CellStyle.ALIGN_CENTER); // 创建一个居中格式
+            style.setBorderBottom(THIN);
+            style.setBorderLeft(THIN);
+            style.setBorderRight(THIN);
+            style.setBorderTop(THIN);
+            style.setAlignment(HorizontalAlignment.CENTER); // 创建一个居中格式
             Font font = wb.createFont();
             font.setFontHeightInPoints((short) 12);//字号
             font.setColor(Font.COLOR_NORMAL);
             style.setFont(font);
             style.setFillForegroundColor(IndexedColors.LIGHT_ORANGE.getIndex()); //背景颜色
-            style.setFillPattern(CellStyle.SOLID_FOREGROUND);
+            style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
             Cell cell = row.createCell(0);
             cell.setCellValue("发票号码");
