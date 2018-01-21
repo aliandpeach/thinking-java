@@ -19,13 +19,13 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * TaobaoTest
+ * TaobaoAPITest
  *
  * @author XiongNeng
  * @version 1.0
  * @since 2017/11/22
  */
-public class TaobaoTest {
+public class TaobaoAPITest {
     /**
      * http://gw.api.tbsandbox.com/router/rest?
      * sign=31D55B058B138B9216BAA7B484B22FC4
